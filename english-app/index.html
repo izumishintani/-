@@ -234,7 +234,22 @@ const VOCAB = [
 ["持続可能な開発目標","Sustainable Development Goals"],["誰一人取り残さない","leave no one behind"],["開発途上国","developing countries"],["貧困削減","poverty reduction"],["食料安全保障","food security"],["飢餓","hunger"],["質の高い教育","quality education"],["ジェンダー平等","gender equality"],["水と衛生","water and sanitation"],["再生可能エネルギー","renewable energy"],["働きがいのある人間らしい仕事","decent work"],["経済成長","economic growth"],["格差・不平等","inequality"],["気候変動","climate change"],["気候変動対策","climate action"],["生物多様性","biodiversity"],["平和と公正","peace and justice"],["パートナーシップ","partnership"],["持続可能性","sustainability"],["包摂的な","inclusive"],
 ["政府開発援助","Official Development Assistance"],["非政府組織","non-governmental organization"],["国際連合","the United Nations"],["人道支援","humanitarian assistance"],["緊急支援","emergency relief"],["難民","refugee"],["避難民","displaced people"],["紛争","conflict"],["復興","recovery"],["脆弱な立場の人々","vulnerable populations"],["受益者","beneficiary"],["現地パートナー","local partner"],["草の根の","grassroots"],["能力強化","capacity building"],["技術協力","technical cooperation"],["資金協力","financial assistance"],["助成金","grant"],["現地調査","field visit"],["研修","training"],["官民連携","public-private partnership"],
 ["利害関係者","stakeholder"],["事業・プロジェクト","project"],["実施する","implement"],["成果(短期的な結果)","output"],["成果(もたらされた変化)","outcome"],["影響・インパクト","impact"],["指標","indicator"],["モニタリングと評価","monitoring and evaluation"],["予算","budget"],["資金調達","fundraising"],["調達","procurement"],["覚書","memorandum of understanding"],["報告書","report"],["進捗","progress"],["締め切り","deadline"],["提案書","proposal"],["会議の議題","agenda"],["議事録","minutes"],["担当者","person in charge"],["持続可能なビジネスモデル","sustainable business model"]
-].map((p,i)=>({id:"v"+(i+1), jp:p[0], en:p[1]}));
+].map((p,i)=>({id:"v"+(i+1), jp:p[0], en:p[1], cat:"spec"}));
+
+const GENERAL = [
+/* 句動詞 */
+["起きる(ベッドから出る)","get up"],["目が覚める","wake up"],["夜更かしする","stay up late"],["寝坊する","oversleep"],["〜を試着する","try on"],["〜を提出する","hand in"],["諦める","give up"],["〜し続ける","keep on"],["(単語などを)調べる","look up"],["〜を楽しみに待つ","look forward to"],["〜の世話をする","take care of"],["〜と仲良くやる","get along with"],["ちょっと立ち寄る","drop by"],["(バスなどに)乗る","get on"],["(バスなどから)降りる","get off"],["〜を延期する","put off"],["〜を身につける・着る","put on"],["〜を脱ぐ","take off"],["〜を車で迎えに行く","pick up"],["〜を車で降ろす","drop off"],["追いつく","catch up"],["〜を思いつく","come up with"],["〜を我慢する","put up with"],["〜を偶然見つける","come across"],["〜に偶然会う","run into"],["電話を切る","hang up"],["折り返し電話する","call back"],["〜を書き留める","write down"],["〜を配る","hand out"],["〜を捨てる","throw away"],["〜を片付ける(しまう)","put away"],["散らかった場所を片付ける","clean up"],["結局〜だと判明する","turn out"],["(誘い・提案を)断る","turn down"],["(音量を)上げる","turn up"],["姿を現す","show up"],["〜を理解する・解決する","figure out"],["(書類に)記入する","fill out"],["〜を使い果たす","run out of"],["うまくいく","work out"],["成長する・大人になる","grow up"],["〜を見送る","see off"],
+/* 基本動詞 */
+["借りる","borrow"],["貸す","lend"],["選ぶ","choose"],["決める","decide"],["説明する","explain"],["提案する","suggest"],["招待する","invite"],["約束する","promise"],["(席・部屋を)予約する","book"],["注文する","order"],["支払う","pay"],["節約する・貯める","save"],["(お金・時間を)使う","spend"],["稼ぐ","earn"],["到着する","arrive"],["急ぐ","hurry"],["運ぶ","carry"],["受け取る","receive"],["失くす","lose"],["忘れる","forget"],["思い出す","remember"],["暗記する","memorize"],["練習する","practice"],["上達する・改善する","improve"],["増える","increase"],["減る","decrease"],["修理する","fix"],["壊す","break"],["押す","push"],["引く","pull"],["運転する","drive"],["料理する","cook"],["掃除する","clean"],["洗う","wash"],["引っ越す","move"],["訪ねる","visit"],["紹介する","introduce"],["翻訳する","translate"],["発音する","pronounce"],["意味する","mean"],["起こる","happen"],["続く・続ける","continue"],["終える","finish"],["参加する","join"],["出席する","attend"],["(会などを)欠席する・逃す","miss"],["キャンセルする","cancel"],["確認する","confirm"],["比較する","compare"],["反対する","disagree"],["謝る","apologize"],["感謝する","appreciate"],["褒める","compliment"],["文句を言う","complain"],["話し合う","discuss"],["推測する","guess"],["期待する","expect"],["心配する","worry"],["信頼する","trust"],["疑う","doubt"],["気づく","notice"],["(はっと)悟る","realize"],["想像する","imagine"],["思い出させる","remind"],["提供する・申し出る","offer"],["断る","refuse"],["受け入れる","accept"],["許す","forgive"],["避ける","avoid"],["従う・ついていく","follow"],["雇う","hire"],["(仕事を)辞める","quit"],["退職する","retire"],["応募する","apply"],["昇進する","get promoted"],["出張する","go on a business trip"],["残業する","work overtime"],["返信する","reply"],["印刷する","print"],["ダウンロードする","download"],["充電する","charge"],["おすすめする","recommend"],["祝う","celebrate"],["包む","wrap"],["注ぐ","pour"],["混ぜる","mix"],["(オーブンで)焼く","bake"],["沸かす・ゆでる","boil"],["予定を組み直す","reschedule"],["集中する","focus"],["くつろぐ","relax"],["散歩する","take a walk"],["昼寝する","take a nap"],["休憩する","take a break"],["シャワーを浴びる","take a shower"],["メモを取る","take notes"],["薬を飲む","take medicine"],["間違える","make a mistake"],["決断する","make a decision"],["(医者などの)予約を取る","make an appointment"],["友達を作る","make friends"],["努力する","make an effort"],
+/* 形容詞・気持ち */
+["便利な","convenient"],["不便な","inconvenient"],["快適な","comfortable"],["危険な","dangerous"],["安全な","safe"],["高価な","expensive"],["混雑した","crowded"],["静かな","quiet"],["うるさい","noisy"],["有名な","famous"],["人気のある","popular"],["退屈な(もの)","boring"],["わくわくさせる","exciting"],["(笑いを誘う)面白い","funny"],["奇妙な","strange"],["特別な","special"],["必要な","necessary"],["十分な","enough"],["似ている","similar"],["複雑な","complicated"],["単純な","simple"],["正しい","correct"],["間違った","wrong"],["確信して","sure"],["可能な","possible"],["不可能な","impossible"],["空腹の","hungry"],["のどが渇いた","thirsty"],["眠い","sleepy"],["くたくたに疲れた","exhausted"],["具合が悪い","sick"],["健康的な","healthy"],["(時間が)早い","early"],["遠い","far"],["広々とした","spacious"],["厚い","thick"],["薄い","thin"],["重い","heavy"],["軽い","light"],["柔らかい","soft"],["甘い","sweet"],["辛い","spicy"],["苦い","bitter"],["酸っぱい","sour"],["しょっぱい","salty"],["新鮮な","fresh"],["ひどい","terrible"],["素晴らしい","wonderful"],["驚くほど見事な","amazing"],["礼儀正しい","polite"],["失礼な","rude"],["正直な","honest"],["内気な","shy"],["社交的な","outgoing"],["真面目な","serious"],["怠け者の","lazy"],["勤勉な","hardworking"],["賢い","smart"],["勇敢な","brave"],["緊張して","nervous"],["落ち着いた","calm"],["動揺して・怒って","upset"],["イライラして","annoyed"],["うれしい","glad"],["がっかりして","disappointed"],["驚いて","surprised"],["ショックを受けて","shocked"],["怖がって","scared"],["誇りに思って","proud"],["うらやましい","jealous"],["満足して","satisfied"],["退屈して(人が)","bored"],["混乱して","confused"],["自信があって","confident"],["恥ずかしくて","embarrassed"],["感謝して","grateful"],["蒸し暑い","humid"],["暖かい","warm"],["ぬれた","wet"],["乾いた","dry"],
+/* 日常の名詞 */
+["冷蔵庫","fridge"],["電子レンジ","microwave"],["洗濯機","washing machine"],["掃除機","vacuum cleaner"],["エアコン","air conditioner"],["天井","ceiling"],["床","floor"],["壁","wall"],["引き出し","drawer"],["棚","shelf"],["鏡","mirror"],["毛布","blanket"],["枕","pillow"],["家賃","rent"],["光熱費","utility bills"],["近所の人","neighbor"],["大家","landlord"],["洗剤","detergent"],["ゴミ","garbage"],["ゴミ箱","trash can"],["領収書","receipt"],["おつり","change"],["現金","cash"],["財布","wallet"],["眼鏡","glasses"],["傘","umbrella"],["手袋","gloves"],["袖","sleeve"],["試着室","fitting room"],["割引","discount"],["セール中で","on sale"],["品切れで","out of stock"],["行列","line"],["交差点","intersection"],["信号","traffic light"],["横断歩道","crosswalk"],["歩道","sidewalk"],["渋滞","traffic jam"],["通勤","commute"],["往復切符","round-trip ticket"],["乗り換え","transfer"],["搭乗券","boarding pass"],["手荷物","luggage"],["税関","customs"],["両替","currency exchange"],["観光","sightseeing"],["お土産","souvenir"],["(飛行機の)便","flight"],["遅延","delay"],["目的地","destination"],["おやつ・軽食","snack"],["飲み物","beverage"],["(飲食店の)お会計","check"],["持ち帰り","takeout"],["(人と会う)約束・予約","appointment"],["休暇","vacation"],["(仕事の)休みの日","day off"],["祝日","national holiday"],["残業","overtime"],["給料","salary"],["時給","hourly wage"],["同僚","coworker"],["上司","boss"],["顧客","customer"],["名刺","business card"],["会議室","meeting room"],["履歴書","resume"],["(採用)面接","job interview"],["経験","experience"],["技能","skill"],["知識","knowledge"],["性格","personality"],["長所","strength"],["短所","weakness"],["習慣","habit"],["気分","mood"],["思い出","memory"],["冗談","joke"],["うわさ","rumor"],["秘密","secret"],["意見","opinion"],["理由","reason"],["結果","result"],["違い","difference"],["語彙","vocabulary"],["文法","grammar"],["間違い","mistake"],["天気予報","weather forecast"],["気温","temperature"],["台風","typhoon"],["地震","earthquake"],["頭痛","headache"],["腹痛","stomachache"],["風邪","cold"],["熱","fever"],["咳","cough"],["薬","medicine"],["薬局","pharmacy"],["けが","injury"],["症状","symptom"],["保険","insurance"],["歯医者","dentist"],["健康診断","checkup"],["充電器","charger"],["コンセント","outlet"],["画面","screen"],["パスワード","password"],["留守番電話","voicemail"],["迷惑メール","spam"],["姪","niece"],["甥","nephew"],["いとこ","cousin"],["義理の母","mother-in-law"],["親戚","relative"],["夫婦・カップル","couple"],
+/* つなぎ言葉・副詞 */
+["めったに〜ない","rarely"],["最近","these days"],["遅かれ早かれ","sooner or later"],["すぐに","right away"],["とりあえず・今のところは","for now"],["これまでのところ","so far"],["結局のところ","after all"],["ついに","finally"],["突然","suddenly"],["徐々に","gradually"],["定期的に","regularly"],["一時的に","temporarily"],["一日おきに","every other day"],["月末","the end of the month"],["事前に","in advance"],["時間どおりに","on time"],["遅くとも","at the latest"],["少なくとも","at least"],["多くても・せいぜい","at most"],["ほとんど","almost"],["ほとんど〜ない","hardly"],["特に","especially"],["実は","actually"],["たぶん","probably"],["絶対に・間違いなく","definitely"],["幸運にも","fortunately"],["残念ながら","unfortunately"],["一般的に","in general"],["具体的には","specifically"],["言い換えれば","in other words"],["その上・さらに","besides"],["しかしながら","however"],["〜だけれども","although"],["〜にもかかわらず","despite"],["〜の代わりに","instead of"],["〜によると","according to"],["〜のおかげで","thanks to"],["〜が原因で","due to"],["〜に関して","regarding"],["〜を除いて","except for"],["お互い","each other"],["〜につき・〜あたり","per"],["およそ","approximately"],["2〜3個の","a few"],["いくつかの","several"],["たくさんの","plenty of"],["全体の","whole"],["残り","the rest"],
+/* 会話フレーズ */
+["お久しぶりです","It's been a while."],["調子はどう?","How's it going?"],["まあまあだよ","Not bad."],["ちょっといいですか?","Do you have a minute?"],["どういう意味?","What do you mean?"],["なるほど・納得です","That makes sense."],["どうかなあ(同意しかねる)","I'm not sure about that."],["冗談でしょ","You're kidding."],["それはすごい!","That's awesome!"],["それは残念だったね","I'm sorry to hear that."],["おめでとう!","Congratulations!"],["頑張ってね!","Good luck!"],["お大事に","Get well soon."],["どうしたの?","What's wrong?"],["本当に助かりました","That really helped."],["どういたしまして","My pleasure."],["お先にどうぞ","After you."],["ちょっと待って","Hold on."],["もう一度言ってもらえますか?","Could you say that again?"],["大したことないよ","It's not a big deal."],["まあ仕方ない","It is what it is."],["気にしないで","Don't worry about it."],["そういえば・ところで","by the way"],["正直に言うと","to be honest"],["私の意見では","in my opinion"],["場合によるね","It depends."],["いいね・良さそう","Sounds good."],["了解・わかった","Got it."],["なんとかなるよ","It'll be fine."],["待ちきれない!","I can't wait!"],["お腹ぺこぺこ","I'm starving."],["また今度ね","Maybe next time."],["その時間で大丈夫です","That works for me."],["割り勘にしよう","Let's split the bill."],["ここは私のおごり","It's on me."],["乾杯!","Cheers!"],["気をつけて帰ってね","Get home safe."],["また連絡取り合おうね","Keep in touch."],["あとでメッセージ送るね","I'll text you later."],["道に迷いました","I'm lost."],["お手洗いはどこですか?","Where is the restroom?"],["写真を撮っていただけますか?","Could you take a picture of us?"],["おすすめは何ですか?","What do you recommend?"],["持ち帰りでお願いします","To go, please."],["これをください","I'll take this one."],["見ているだけです","I'm just looking."],["どうぞ(物を渡すとき)","Here you go."],["ええと・そうですね","Let me see."],["いい一日を!","Have a good one!"]
+].map((p,i)=>({id:"g"+(i+1), jp:p[0], en:p[1], cat:"gen"}));
 
 const SAK_SETS = [
 {key:"basic", name:"Set A|基礎・日常(中学文法)", items:[
@@ -635,20 +650,31 @@ function speak(text, rate, onend){
 }
 
 /* ================= VOCAB ================= */
-function allTerms(){ return VOCAB.concat(S.custom); }
+function allTerms(){ return VOCAB.concat(GENERAL, S.custom); }
 function vocabState(id){ return S.vocab[id]; }
 const INTERVALS = [1,2,4,7,14,30];
+function newLogToday(){
+  const today = todayStr();
+  let n = S.newLog[today];
+  if(typeof n === "number") n = {s:n, g:0}; // 旧形式からの移行
+  if(!n) n = {s:0, g:0};
+  S.newLog[today] = n;
+  return n;
+}
+function genNewCap(){ return S.settings.genNew || 30; }
 function buildVocabQueue(){
   const today = todayStr();
-  const due = [], fresh = [];
+  const due = [], freshSpec = [], freshGen = [];
   allTerms().forEach(t => {
     const st = S.vocab[t.id];
     if(st){ if(st.due <= today) due.push(t); }
-    else fresh.push(t);
+    else if(t.cat === "gen") freshGen.push(t);
+    else freshSpec.push(t);
   });
-  const newToday = (S.newLog[today]||0);
-  const newCap = Math.max(0, 10 - newToday);
-  return due.concat(fresh.slice(0, newCap));
+  const n = newLogToday();
+  const capS = Math.max(0, 10 - n.s);
+  const capG = Math.max(0, genNewCap() - n.g);
+  return due.concat(freshSpec.slice(0, capS)).concat(freshGen.slice(0, capG));
 }
 function renderVocabHome(){
   const today = todayStr();
@@ -666,7 +692,14 @@ function renderVocabHome(){
     '</div>'+
     (queue.length
       ? '<button class="btn primary" id="startVocab" type="button" style="width:100%">今日の単語を始める</button>'
-      : '<p class="muted center" style="margin:6px 0">今日の分は完了!また明日 🎉</p>');
+      : '<p class="muted center" style="margin:6px 0">今日の分は完了!また明日 🎉</p>')+
+    '<div class="controls" style="margin:12px 0 0">'+
+    '<label for="genNewSel">一般語の新規カード/日</label>'+
+    '<select id="genNewSel"><option value="10">10</option><option value="20">20</option><option value="30">30</option></select>'+
+    '<span class="muted small">専門・追加語は10/日</span></div>';
+  const sel = document.getElementById("genNewSel");
+  sel.value = String(genNewCap());
+  sel.addEventListener("change", e => { S.settings.genNew = parseInt(e.target.value,10); save(); renderVocabHome(); });
   const b = document.getElementById("startVocab");
   if(b) b.addEventListener("click", () => startVocabDrill(queue));
 }
@@ -683,7 +716,7 @@ function startVocabDrill(queue){
     drill.innerHTML =
       '<div class="progress"><i style="width:'+Math.round(doneCount/Math.max(total,1)*100)+'%"></i></div>'+
       '<div class="drillcard">'+
-      (isNew?'<span class="pill" style="align-self:center">NEW</span>':'')+
+      (isNew?'<span class="pill" style="align-self:center">NEW|'+(t.cat==="gen"?"一般":"専門")+'</span>':'')+
       '<div class="q">'+esc(t.jp)+'</div>'+
       '<div id="ansArea"><button class="btn primary" id="revealBtn" type="button">答えを見る</button></div>'+
       '</div>';
@@ -701,7 +734,7 @@ function startVocabDrill(queue){
   }
   function grade(t, ok){
     const wasNew = !S.vocab[t.id];
-    if(wasNew){ S.newLog[today] = (S.newLog[today]||0)+1; }
+    if(wasNew){ const n = newLogToday(); if(t.cat === "gen") n.g++; else n.s++; }
     let st = S.vocab[t.id] || {box:0, due:today};
     if(ok){
       st.box = Math.min(st.box+1, 5);
