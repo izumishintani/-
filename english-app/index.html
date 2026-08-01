@@ -1,0 +1,996 @@
+<title>Bridge — 英語独学トレーナー</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{
+  --bg:#EFF3F5; --card:#FFFFFF; --ink:#18262F; --muted:#5B6B76; --line:#D9E2E8;
+  --accent:#0F6FAE; --accent-soft:#E3EFF7; --accent-ink:#FFFFFF;
+  --good:#2F8F5B; --good-soft:#E4F2EA; --warn:#C8641E; --warn-soft:#F7EBE0;
+  --dot-vocab:#C4504F; --dot-sak:#C97B29; --dot-shadow:#3D7DC8; --dot-listen:#3E8E7E; --dot-speech:#5B8C4A;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0F1519; --card:#18222A; --ink:#E7EDF1; --muted:#93A4AF; --line:#243039;
+    --accent:#4FA3DC; --accent-soft:#1A2E3D; --accent-ink:#0F1519;
+    --good:#57B583; --good-soft:#16281E; --warn:#DE8A45; --warn-soft:#2E2015;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#EFF3F5; --card:#FFFFFF; --ink:#18262F; --muted:#5B6B76; --line:#D9E2E8;
+  --accent:#0F6FAE; --accent-soft:#E3EFF7; --accent-ink:#FFFFFF;
+  --good:#2F8F5B; --good-soft:#E4F2EA; --warn:#C8641E; --warn-soft:#F7EBE0;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1519; --card:#18222A; --ink:#E7EDF1; --muted:#93A4AF; --line:#243039;
+  --accent:#4FA3DC; --accent-soft:#1A2E3D; --accent-ink:#0F1519;
+  --good:#57B583; --good-soft:#16281E; --warn:#DE8A45; --warn-soft:#2E2015;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px; line-height:1.6;
+  padding-bottom:calc(74px + env(safe-area-inset-bottom));
+}
+button{font-family:inherit;font-size:1rem;cursor:pointer;border:none;border-radius:10px;background:var(--card);color:var(--ink)}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header.app{
+  padding:calc(14px + env(safe-area-inset-top)) 18px 10px;
+  display:flex;justify-content:space-between;align-items:baseline;max-width:640px;margin:0 auto;
+}
+header.app .brand{font-weight:800;font-size:1.15rem;letter-spacing:.02em}
+header.app .brand span{color:var(--accent)}
+header.app .date{color:var(--muted);font-size:.85rem}
+main{max-width:640px;margin:0 auto;padding:0 14px}
+section.tab{display:none}
+section.tab.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+h2{font-size:1.02rem;margin:18px 4px 10px;display:flex;align-items:center;gap:8px}
+h2 .eyebrow{font-size:.7rem;letter-spacing:.14em;color:var(--muted);font-weight:600}
+.muted{color:var(--muted);font-size:.85rem}
+.small{font-size:.85rem}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.75rem;font-weight:600;background:var(--accent-soft);color:var(--accent)}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+/* home */
+.streak{display:flex;gap:14px;align-items:center}
+.streak .num{font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.week{display:flex;gap:8px;margin-top:10px}
+.week .d{width:30px;text-align:center;font-size:.7rem;color:var(--muted)}
+.week .d .c{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);margin:0 auto 3px;display:flex;align-items:center;justify-content:center;font-size:.75rem}
+.week .d .c.core{border-color:var(--good);color:var(--good)}
+.week .d .c.full{background:var(--good);border-color:var(--good);color:#fff}
+.tasklist{display:flex;flex-direction:column;gap:8px}
+.task{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px}
+.task.done{background:var(--good-soft);border-color:transparent}
+.task .chk{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);background:transparent;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;padding:0}
+.task.done .chk{background:var(--good);border-color:var(--good)}
+.task .info{flex:1;min-width:0}
+.task .info .t{font-weight:700}
+.task .info .s{font-size:.8rem;color:var(--muted)}
+.task .go{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.85rem;padding:8px 12px;border-radius:10px;flex:none}
+.timerbar{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom));display:none;justify-content:center;pointer-events:none;z-index:30}
+.timerbar.on{display:flex}
+.timerbar .inner{pointer-events:auto;background:var(--ink);color:var(--bg);border-radius:999px;padding:8px 18px;display:flex;gap:14px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.timerbar .time{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.1rem}
+.timerbar button{background:transparent;color:inherit;font-size:.85rem;padding:4px 6px}
+/* drill (vocab / sakubun) */
+.drillcard{min-height:200px;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px}
+.drillcard .q{font-size:1.35rem;font-weight:700;text-wrap:balance}
+.drillcard .a{font-size:1.25rem;color:var(--accent);font-weight:700;font-family:Georgia,"Times New Roman",serif}
+.btnrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{padding:12px 18px;border-radius:12px;font-weight:700;border:1px solid var(--line)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.good{background:var(--good);color:#fff;border-color:var(--good)}
+.btn.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.btn.ghost{background:transparent;color:var(--accent);border-color:transparent;font-weight:600}
+.progress{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:8px 0 14px}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .2s}
+@media (prefers-reduced-motion: reduce){ .progress i{transition:none} }
+/* lists */
+.rowbtn{display:flex;width:100%;text-align:left;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--card)}
+.rowbtn .info{flex:1;min-width:0}
+.rowbtn .t{font-weight:700}
+.rowbtn .s{font-size:.8rem;color:var(--muted)}
+.rowbtn .arr{color:var(--muted)}
+/* shadowing detail */
+.script{font-family:Georgia,"Times New Roman",serif;font-size:1.06rem;line-height:1.75}
+.script .sent{padding:2px 4px;border-radius:6px;cursor:pointer}
+.script .sent.playing{background:var(--accent-soft)}
+.jp-line{font-family:inherit;font-size:.82rem;color:var(--muted);display:block;margin:0 4px 6px}
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+.controls label{font-size:.85rem;color:var(--muted)}
+input[type=range]{accent-color:var(--accent);width:130px}
+select,input[type=text]{font-family:inherit;font-size:.95rem;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);max-width:100%}
+.vocabnote{border-top:1px dashed var(--line);margin-top:12px;padding-top:10px}
+.vocabnote dt{font-weight:700;font-family:Georgia,serif;display:inline}
+.vocabnote dd{display:inline;margin:0 0 0 6px;color:var(--muted);font-size:.88rem}
+.vocabnote div{margin-bottom:4px}
+/* speech */
+.bigtimer{font-size:3.4rem;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.02em;margin:6px 0}
+.hints{margin:8px 0 4px;padding-left:1.2em}
+.hints li{margin-bottom:4px;font-family:Georgia,serif}
+audio{width:100%;margin-top:8px}
+/* bottom nav */
+nav.tabs{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:var(--card);border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;color:var(--muted);font-size:.68rem;padding:4px 8px;min-width:56px}
+nav.tabs button .ic{font-size:1.25rem;line-height:1}
+nav.tabs button.active{color:var(--accent);font-weight:700}
+.backlink{background:transparent;color:var(--accent);font-weight:600;padding:8px 4px;margin:8px 0 0}
+.addform{display:flex;flex-direction:column;gap:8px}
+.center{text-align:center}
+.spacer{height:8px}
+</style>
+
+<header class="app">
+  <div class="brand">Bridge<span>.</span> <span class="muted" style="font-weight:400;font-size:.8rem">英語独学トレーナー</span></div>
+  <div class="date" id="hdrDate"></div>
+</header>
+
+<main>
+
+<!-- ============ HOME ============ -->
+<section class="tab active" id="tab-home">
+  <div class="card streak">
+    <div>
+      <div class="num" id="streakNum">0</div>
+      <div class="muted small">連続コア達成</div>
+    </div>
+    <div style="flex:1">
+      <div class="small" style="font-weight:700">今週の記録</div>
+      <div class="week" id="weekStrip"></div>
+    </div>
+  </div>
+
+  <h2><span class="eyebrow">TODAY</span> 今日の60分</h2>
+  <div class="card">
+    <div class="tasklist" id="taskList"></div>
+    <p class="muted small" style="margin:12px 0 0">
+      単語+英作文の30分が<strong>コア</strong>。忙しい日もここだけは死守。
+      水・土・日は多聴の枠がスピーチに変わります。
+    </p>
+  </div>
+
+  <h2><span class="eyebrow">PLAN</span> いまのフェーズ</h2>
+  <div class="card small" id="phaseCard"></div>
+</section>
+
+<!-- ============ VOCAB ============ -->
+<section class="tab" id="tab-vocab">
+  <h2><span class="dot" style="background:var(--dot-vocab)"></span>単語(日 → 英)</h2>
+  <div class="card" id="vocabHome"></div>
+  <div class="card" id="vocabDrill" style="display:none"></div>
+  <div class="card">
+    <div class="small" style="font-weight:700;margin-bottom:8px">自分の用語を追加(仕事で出会った語をここへ)</div>
+    <div class="addform">
+      <input type="text" id="addJp" placeholder="日本語(例:現地事務所)">
+      <input type="text" id="addEn" placeholder="英語(例:field office)">
+      <button class="btn primary" id="addTermBtn" type="button">追加する</button>
+      <div class="muted small" id="addMsg"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SAKUBUN ============ -->
+<section class="tab" id="tab-sak">
+  <h2><span class="dot" style="background:var(--dot-sak)"></span>口頭英作文</h2>
+  <p class="muted small" style="margin:0 4px 10px">日本語を見て、<strong>声に出して</strong>英語を言ってから答えを見る。詰まらず言えたら「言えた」。</p>
+  <div id="sakHome"></div>
+  <div class="card" id="sakDrill" style="display:none"></div>
+</section>
+
+<!-- ============ SHADOWING ============ -->
+<section class="tab" id="tab-shadow">
+  <h2><span class="dot" style="background:var(--dot-shadow)"></span>シャドーイング</h2>
+  <div id="shadowList"></div>
+  <div id="shadowDetail" style="display:none"></div>
+  <div class="card small">
+    <div style="font-weight:700;margin-bottom:6px">音声の設定</div>
+    <div class="controls">
+      <label for="voiceSel">声</label>
+      <select id="voiceSel"></select>
+    </div>
+    <p class="muted small" style="margin:6px 0 0">端末内蔵の音声合成を使用。iPhoneは「設定 &gt; アクセシビリティ &gt; 読み上げコンテンツ &gt; 声」で高品質な英語音声を追加できます。</p>
+  </div>
+</section>
+
+<!-- ============ SPEECH ============ -->
+<section class="tab" id="tab-speech">
+  <h2><span class="dot" style="background:var(--dot-speech)"></span>1分間スピーチ</h2>
+  <div id="speechHome"></div>
+  <div id="speechDetail" style="display:none"></div>
+</section>
+
+</main>
+
+<div class="timerbar" id="timerBar">
+  <div class="inner">
+    <span id="timerLabel" class="small"></span>
+    <span class="time" id="timerTime">00:00</span>
+    <button type="button" id="timerPause">一時停止</button>
+    <button type="button" id="timerStop">終了</button>
+  </div>
+</div>
+
+<nav class="tabs">
+  <button data-tab="home" class="active" type="button"><span class="ic">🏠</span>今日</button>
+  <button data-tab="vocab" type="button"><span class="ic">🗂</span>単語</button>
+  <button data-tab="sak" type="button"><span class="ic">💬</span>英作文</button>
+  <button data-tab="shadow" type="button"><span class="ic">🎧</span>シャドー</button>
+  <button data-tab="speech" type="button"><span class="ic">🎤</span>スピーチ</button>
+</nav>
+
+<script>
+"use strict";
+/* ================= DATA ================= */
+const VOCAB = [
+["持続可能な開発目標","Sustainable Development Goals"],["誰一人取り残さない","leave no one behind"],["開発途上国","developing countries"],["貧困削減","poverty reduction"],["食料安全保障","food security"],["飢餓","hunger"],["質の高い教育","quality education"],["ジェンダー平等","gender equality"],["水と衛生","water and sanitation"],["再生可能エネルギー","renewable energy"],["働きがいのある人間らしい仕事","decent work"],["経済成長","economic growth"],["格差・不平等","inequality"],["気候変動","climate change"],["気候変動対策","climate action"],["生物多様性","biodiversity"],["平和と公正","peace and justice"],["パートナーシップ","partnership"],["持続可能性","sustainability"],["包摂的な","inclusive"],
+["政府開発援助","Official Development Assistance"],["非政府組織","non-governmental organization"],["国際連合","the United Nations"],["人道支援","humanitarian assistance"],["緊急支援","emergency relief"],["難民","refugee"],["避難民","displaced people"],["紛争","conflict"],["復興","recovery"],["脆弱な立場の人々","vulnerable populations"],["受益者","beneficiary"],["現地パートナー","local partner"],["草の根の","grassroots"],["能力強化","capacity building"],["技術協力","technical cooperation"],["資金協力","financial assistance"],["助成金","grant"],["現地調査","field visit"],["研修","training"],["官民連携","public-private partnership"],
+["利害関係者","stakeholder"],["事業・プロジェクト","project"],["実施する","implement"],["成果(短期的な結果)","output"],["成果(もたらされた変化)","outcome"],["影響・インパクト","impact"],["指標","indicator"],["モニタリングと評価","monitoring and evaluation"],["予算","budget"],["資金調達","fundraising"],["調達","procurement"],["覚書","memorandum of understanding"],["報告書","report"],["進捗","progress"],["締め切り","deadline"],["提案書","proposal"],["会議の議題","agenda"],["議事録","minutes"],["担当者","person in charge"],["持続可能なビジネスモデル","sustainable business model"]
+].map((p,i)=>({id:"v"+(i+1), jp:p[0], en:p[1]}));
+
+const SAK_SETS = [
+{key:"basic", name:"Set A|基礎・日常(中学文法)", items:[
+["私は毎朝7時に起きます。","I get up at seven every morning."],
+["今日はとても忙しかったです。","I was very busy today."],
+["週末は友達に会う予定です。","I'm going to meet my friend this weekend."],
+["コーヒーを一杯もらえますか。","Can I have a cup of coffee?"],
+["駅までの道を教えてもらえますか。","Could you tell me the way to the station?"],
+["彼は今、電話中です。","He is on the phone right now."],
+["昨夜は雨が降っていました。","It was raining last night."],
+["私はこの町に3年間住んでいます。","I have lived in this town for three years."],
+["もう昼ご飯を食べましたか。","Have you had lunch yet?"],
+["窓を開けてもいいですか。","May I open the window?"],
+["明日は早く起きなければなりません。","I have to get up early tomorrow."],
+["彼女は英語を話すのが得意です。","She is good at speaking English."],
+["何か飲み物はいかがですか。","Would you like something to drink?"],
+["その映画はとても面白かったです。","The movie was really interesting."],
+["もう少しゆっくり話してもらえますか。","Could you speak more slowly?"],
+["すみません、聞き取れませんでした。","Sorry, I didn't catch that."],
+["それはどういう意味ですか。","What does that mean?"],
+["私もそう思います。","I think so too."],
+["手伝ってくれてありがとう。","Thank you for your help."],
+["ちょっと待ってもらえますか。","Could you wait a moment?"],
+["日本に来たことはありますか。","Have you ever been to Japan?"],
+["疲れているので早く寝ます。","I'm tired, so I'll go to bed early."],
+["これはいくらですか。","How much is this?"],
+["今度の日曜日、暇ですか。","Are you free next Sunday?"],
+["また近いうちに話しましょう。","Let's talk again soon."]
+]},
+{key:"work", name:"Set B|仕事・会議・メール", items:[
+["会議を始めましょう。","Let's start the meeting."],
+["本日の議題は3つあります。","We have three items on today's agenda."],
+["金曜日までに報告書を送っていただけますか。","Could you send me the report by Friday?"],
+["進捗を共有させてください。","Let me share our progress."],
+["プロジェクトは予定どおり進んでいます。","The project is going as planned."],
+["少し遅れが出ています。","We are a little behind schedule."],
+["締め切りを1週間延ばせますか。","Can we extend the deadline by one week?"],
+["その点について質問があります。","I have a question about that point."],
+["ご意見をお聞かせください。","I'd like to hear your opinion."],
+["あなたの提案に賛成です。","I agree with your proposal."],
+["申し訳ありませんが、その案には賛成できません。","I'm afraid I can't agree with that idea."],
+["予算を確認する必要があります。","We need to check the budget."],
+["詳細をメールで送ります。","I'll send you the details by email."],
+["添付ファイルをご確認ください。","Please check the attached file."],
+["会議の議事録を共有します。","I'll share the minutes of the meeting."],
+["この件の担当者は誰ですか。","Who is in charge of this matter?"],
+["来週、打ち合わせの時間をいただけますか。","Could we set up a meeting next week?"],
+["何時がご都合よろしいですか。","What time works for you?"],
+["オンラインで参加してもいいですか。","Can I join online?"],
+["音声が聞こえません。","I can't hear you."],
+["画面を共有します。","Let me share my screen."],
+["後ほど折り返しご連絡します。","I'll get back to you later."],
+["確認して、明日までにお返事します。","I'll check and get back to you by tomorrow."],
+["ご協力ありがとうございました。","Thank you for your cooperation."],
+["今日はここまでにしましょう。","Let's call it a day."]
+]},
+{key:"sdgs", name:"Set C|国際協力・SDGs", items:[
+["私は国際協力の分野で働いています。","I work in the field of international cooperation."],
+["私たちの団体は途上国の教育を支援しています。","Our organization supports education in developing countries."],
+["このプロジェクトは農村部の女子教育を支援しています。","This project supports girls' education in rural areas."],
+["私たちは現地パートナーと協力しています。","We work with local partners."],
+["このプログラムの受益者は約5,000人です。","This program has about five thousand beneficiaries."],
+["安全な水を利用できない人がまだ大勢います。","Many people still don't have access to safe water."],
+["私たちの目標は貧困を削減することです。","Our goal is to reduce poverty."],
+["気候変動は最も深刻な課題の一つです。","Climate change is one of the most serious challenges."],
+["誰一人取り残さないことが大切です。","It is important to leave no one behind."],
+["この事業は日本のODAによって資金提供されています。","This project is funded by Japanese ODA."],
+["私たちは現地スタッフの能力強化に取り組んでいます。","We are working on capacity building for local staff."],
+["来月、現地調査を行う予定です。","We are planning a field visit next month."],
+["プロジェクトの成果を評価する必要があります。","We need to evaluate the outcomes of the project."],
+["この指標は進捗を測るために使われます。","This indicator is used to measure progress."],
+["報告書はドナーに提出されます。","The report will be submitted to the donors."],
+["私たちは資金調達のイベントを計画しています。","We are planning a fundraising event."],
+["持続可能性が私たちの最優先事項です。","Sustainability is our top priority."],
+["地域社会との信頼関係が欠かせません。","Trust with the local community is essential."],
+["緊急支援だけでなく、長期的な支援も必要です。","We need not only emergency relief but also long-term support."],
+["紛争のために多くの人が家を追われました。","Many people were displaced because of the conflict."],
+["難民の子どもたちが学校に通えるよう支援しています。","We help refugee children go to school."],
+["ジェンダー平等はすべての目標の基盤です。","Gender equality is the foundation of all the goals."],
+["再生可能エネルギーへの投資が増えています。","Investment in renewable energy is growing."],
+["この分野では官民連携が重要です。","Public-private partnerships are important in this field."],
+["一緒に働けることを楽しみにしています。","I look forward to working with you."]
+]}
+];
+
+const SCRIPTS = [
+{id:"s1", level:"A2", phase:1, title:"My Job", jpTitle:"私の仕事",
+ sents:[
+  ["Hello, my name is Izumi.","こんにちは、私の名前はイズミです。"],
+  ["I work for an organization in Tokyo.","東京のある団体で働いています。"],
+  ["We support people in developing countries.","私たちは開発途上国の人々を支援しています。"],
+  ["My job has many parts.","私の仕事にはいろいろな側面があります。"],
+  ["I write reports, plan projects, and talk with our partners.","報告書を書き、事業を計画し、パートナーと話します。"],
+  ["Sometimes the work is hard, but I like it.","大変なこともありますが、この仕事が好きです。"],
+  ["I believe that small actions can change the world.","小さな行動が世界を変えられると信じています。"],
+  ["Nice to meet you.","どうぞよろしく。"]],
+ vocab:[["organization","団体・組織"],["support","支援する"],["developing countries","開発途上国"],["report","報告書"],["partner","パートナー"]]},
+{id:"s2", level:"A2", phase:1, title:"A Busy Monday", jpTitle:"忙しい月曜日",
+ sents:[
+  ["On Monday, I start work at nine.","月曜日は9時に仕事を始めます。"],
+  ["First, I check my email and reply to our partners.","まずメールを確認し、パートナーに返信します。"],
+  ["At ten, we have a team meeting.","10時にチームミーティングがあります。"],
+  ["We talk about our projects and share updates.","事業について話し、最新情報を共有します。"],
+  ["In the afternoon, I prepare a report for a donor.","午後はドナー向けの報告書を準備します。"],
+  ["It takes a long time, but it is important work.","時間はかかりますが、大事な仕事です。"],
+  ["I often have an online meeting with people in other countries.","海外の人とのオンライン会議もよくあります。"],
+  ["At six, I finish work and go home.","6時に仕事を終えて帰宅します。"]],
+ vocab:[["reply","返信する"],["share updates","最新情報を共有する"],["prepare","準備する"],["donor","ドナー・資金提供者"],["online meeting","オンライン会議"]]},
+{id:"s3", level:"A2", phase:1, title:"What Are the SDGs?", jpTitle:"SDGsとは?",
+ sents:[
+  ["The SDGs are seventeen goals for a better world.","SDGsは、より良い世界のための17の目標です。"],
+  ["All the members of the United Nations agreed on them in 2015.","2015年に国連の全加盟国が合意しました。"],
+  ["The goals cover many problems, like poverty, hunger, and climate change.","目標は貧困・飢餓・気候変動など多くの課題を扱います。"],
+  ["They also include clean water, good health, and quality education.","安全な水、健康、質の高い教育も含まれます。"],
+  ["The most important idea is simple: leave no one behind.","最も大切な考えはシンプルです。誰一人取り残さない。"],
+  ["Everyone can do something, and every action counts.","誰にでもできることがあり、すべての行動に意味があります。"]],
+ vocab:[["goal","目標"],["agree on","〜に合意する"],["poverty","貧困"],["include","含む"],["count","重要である・意味を持つ"]]},
+{id:"s4", level:"B1", phase:2, title:"Clean Water Changes Everything", jpTitle:"安全な水がすべてを変える",
+ sents:[
+  ["In many villages, people do not have safe water near their homes.","多くの村では、家の近くに安全な水がありません。"],
+  ["Women and children often walk for hours every day to collect it.","女性や子どもは水汲みのために毎日何時間も歩きます。"],
+  ["Because of this, many girls cannot go to school.","そのため、学校に行けない女の子が大勢います。"],
+  ["Dirty water also makes people sick.","汚れた水は病気の原因にもなります。"],
+  ["Our project builds wells and teaches communities how to keep water clean.","私たちの事業は井戸を作り、水を清潔に保つ方法を地域に伝えます。"],
+  ["When a village gets safe water, everything changes.","村に安全な水が届くと、すべてが変わります。"],
+  ["Children return to school, people stay healthy, and families have more time to work.","子どもは学校に戻り、人々は健康になり、家族は働く時間を得ます。"],
+  ["Clean water is not just water.","きれいな水は、ただの水ではありません。"],
+  ["It is the first step out of poverty.","貧困から抜け出す最初の一歩なのです。"]],
+ vocab:[["collect","集める・汲む"],["well","井戸"],["community","地域社会"],["stay healthy","健康を保つ"],["step out of poverty","貧困から抜け出す一歩"]]},
+{id:"s5", level:"B1", phase:2, title:"Why Girls' Education Matters", jpTitle:"女子教育が重要な理由",
+ sents:[
+  ["Education changes lives, especially for girls.","教育は人生を変えます。特に女の子にとっては。"],
+  ["When a girl finishes school, she earns more, marries later, and raises healthier children.","学校を卒業した女性は収入が増え、結婚が遅くなり、より健康な子どもを育てます。"],
+  ["However, millions of girls around the world are still out of school.","しかし、世界では今も数百万人の女の子が学校に通えていません。"],
+  ["Some families cannot pay school fees.","学費を払えない家庭もあります。"],
+  ["Others need their daughters to work at home.","娘に家の仕事をさせる必要がある家庭もあります。"],
+  ["Our program offers scholarships and trains local teachers.","私たちのプログラムは奨学金を提供し、現地の教師を育成します。"],
+  ["We also talk with parents about the value of education.","保護者と教育の価値について話し合いもします。"],
+  ["Educating a girl is one of the best investments a country can make.","女子教育は、国ができる最良の投資の一つです。"]],
+ vocab:[["earn","稼ぐ"],["out of school","学校に通えていない"],["school fees","学費"],["scholarship","奨学金"],["investment","投資"]]},
+{id:"s6", level:"B1", phase:2, title:"Working with Local Partners", jpTitle:"現地パートナーとの協働",
+ sents:[
+  ["International cooperation does not mean doing everything ourselves.","国際協力とは、自分たちで全部やることではありません。"],
+  ["Local people understand their community better than anyone.","地域のことを一番よく知っているのは現地の人々です。"],
+  ["That is why we always work with local partners.","だから私たちは必ず現地パートナーと協働します。"],
+  ["They know the language, the culture, and the real needs of the people.","彼らは言語、文化、そして人々の本当のニーズを知っています。"],
+  ["Our role is to support them with training, funding, and technical advice.","私たちの役割は、研修・資金・技術助言で彼らを支えることです。"],
+  ["This is called capacity building.","これを能力強化と呼びます。"],
+  ["When the project ends, our partners can continue the work without us.","事業が終わっても、パートナーは自分たちで活動を続けられます。"],
+  ["That is what makes support truly sustainable.","それこそが、本当に持続可能な支援です。"]],
+ vocab:[["local partner","現地パートナー"],["needs","ニーズ"],["funding","資金提供"],["capacity building","能力強化"],["sustainable","持続可能な"]]},
+{id:"s7", level:"B1", phase:2, title:"A Field Visit", jpTitle:"現地調査",
+ sents:[
+  ["Last month, I visited one of our project sites.","先月、事業地の一つを訪問しました。"],
+  ["It was a small farming village, about three hours from the capital.","首都から3時間ほどの小さな農村です。"],
+  ["We met the local staff and walked around the community.","現地スタッフと会い、地域を歩いて回りました。"],
+  ["Farmers showed us their new irrigation system and told us how their harvest had improved.","農家の人たちは新しい灌漑設備を見せ、収穫が良くなったと話してくれました。"],
+  ["I interviewed several families and took notes for our evaluation report.","何家族かに聞き取りをし、評価報告書のためのメモを取りました。"],
+  ["One mother said her children could now eat three meals a day.","ある母親は、子どもが1日3食食べられるようになったと言いました。"],
+  ["Numbers are important, but stories like hers tell us what really matters.","数字は大切ですが、本当に大事なことを教えてくれるのは彼女のような物語です。"]],
+ vocab:[["project site","事業地"],["irrigation","灌漑"],["harvest","収穫"],["interview","聞き取りをする"],["evaluation","評価"]]},
+{id:"s8", level:"B2", phase:3, title:"Food Security Under Pressure", jpTitle:"圧力にさらされる食料安全保障",
+ sents:[
+  ["Global food security is under growing pressure.","世界の食料安全保障は増大する圧力にさらされています。"],
+  ["Conflict, climate change, and rising prices have pushed millions of people into hunger.","紛争・気候変動・物価上昇が、数百万人を飢餓に追いやりました。"],
+  ["According to the United Nations, more than seven hundred million people do not get enough food.","国連によれば、7億人以上が十分な食料を得られていません。"],
+  ["Small farmers are hit especially hard, as droughts and floods destroy their crops.","干ばつと洪水が作物を破壊し、小規模農家が特に打撃を受けています。"],
+  ["Humanitarian agencies are calling for more funding for emergency food assistance.","人道支援機関は緊急食料支援への資金拡大を求めています。"],
+  ["At the same time, experts stress the need for long-term investment in sustainable agriculture.","同時に専門家は、持続可能な農業への長期投資の必要性を強調します。"],
+  ["Without action on both fronts, the goal of zero hunger will remain out of reach.","両面での行動なしには、飢餓ゼロの目標は手の届かないままでしょう。"]],
+ vocab:[["under pressure","圧力にさらされて"],["drought","干ばつ"],["humanitarian agency","人道支援機関"],["call for","〜を求める"],["out of reach","手が届かない"]]},
+{id:"s9", level:"B2", phase:3, title:"Financing Renewable Energy", jpTitle:"再生可能エネルギーへの資金供給",
+ sents:[
+  ["Developing countries need massive investment in renewable energy.","開発途上国は再生可能エネルギーへの巨額の投資を必要としています。"],
+  ["Solar and wind power are now cheaper than fossil fuels in many regions.","多くの地域で、太陽光と風力はすでに化石燃料より安価です。"],
+  ["However, private investors often see these markets as too risky.","しかし民間投資家は、これらの市場をリスクが高すぎると見なしがちです。"],
+  ["This is where public-private partnerships play a key role.","ここで重要な役割を果たすのが官民連携です。"],
+  ["Governments and development banks can reduce the risk by providing guarantees and low-interest loans.","政府や開発銀行は、保証や低利融資でリスクを減らせます。"],
+  ["When public money leads, private money follows.","公的資金が先導すれば、民間資金が続きます。"],
+  ["Clean energy is not only about fighting climate change.","クリーンエネルギーは気候変動対策のためだけではありません。"],
+  ["It also creates jobs, powers schools and hospitals, and drives economic growth.","雇用を生み、学校や病院に電力を届け、経済成長を牽引するのです。"]],
+ vocab:[["massive investment","巨額の投資"],["fossil fuels","化石燃料"],["play a key role","重要な役割を果たす"],["guarantee","保証"],["drive growth","成長を牽引する"]]},
+{id:"s10", level:"B2", phase:3, title:"Leave No One Behind", jpTitle:"誰一人取り残さない",
+ sents:[
+  ["The promise at the heart of the SDGs is simple but radical: leave no one behind.","SDGsの核心にある約束はシンプルかつ根源的です。誰一人取り残さない。"],
+  ["It means reaching the people who are hardest to reach.","それは、最も手が届きにくい人々に手を差し伸べることを意味します。"],
+  ["Refugees, people with disabilities, and those living in extreme poverty are often excluded from progress.","難民、障害のある人々、極度の貧困にある人々は、しばしば進歩から取り残されます。"],
+  ["Average numbers can hide their situation.","平均値は彼らの状況を覆い隠すことがあります。"],
+  ["A country's economy may grow while inequality gets worse.","経済が成長する一方で、格差が悪化することもあるのです。"],
+  ["That is why we need data that shows who is being left out, and policies that include the most vulnerable.","だからこそ、誰が取り残されているかを示すデータと、最も脆弱な人々を包摂する政策が必要です。"],
+  ["Development that ignores these people is not true development.","彼らを無視した開発は、本当の開発ではありません。"],
+  ["Progress counts only when it counts everyone.","進歩は、すべての人を数に入れて初めて意味を持ちます。"]],
+ vocab:[["radical","根源的な"],["excluded","排除された"],["average","平均"],["left out","取り残されて"],["vulnerable","脆弱な"]]}];
+
+const THEMES = [
+{phase:1, name:"Phase 1|身近なテーマ", items:[
+["昨日したこと","What I Did Yesterday",["What did you do in the morning and evening?","How did you feel about the day?"]],
+["好きな食べ物","My Favorite Food",["What is it and how often do you eat it?","Why do you like it?"]],
+["週末の予定","My Plans for the Weekend",["What are you going to do?","Who will you spend time with?"]],
+["私の朝のルーティン","My Morning Routine",["What time do you get up?","What do you do before work?"]],
+["好きな場所","A Place I Love",["Where is it?","What do you do there?"]],
+["最近買ってよかったもの","Something I Bought Recently",["What is it?","Why was it a good buy?"]],
+["家族や友人について","My Family and Friends",["Who are they?","What do you like to do together?"]],
+["私の趣味","My Hobby",["What is it and when did you start?","Why do you enjoy it?"]],
+["行ってみたい国","A Country I Want to Visit",["Which country and why?","What do you want to do there?"]],
+["好きな季節","My Favorite Season",["Which season do you like best?","What do you enjoy doing in it?"]],
+["最近見た映画・動画","A Movie or Video I Watched",["What was it about?","Would you recommend it?"]],
+["今年やりたいこと","Something I Want to Do This Year",["What is your goal?","What will you do first?"]]
+]},
+{phase:2, name:"Phase 2|仕事のテーマ", items:[
+["私の仕事内容","What I Do at Work",["What is your role?","What does a typical day look like?"]],
+["今日の業務","What I Did at Work Today",["What tasks did you work on?","What went well or badly?"]],
+["所属団体の紹介","About My Organization",["What does your organization do?","Who do you work with?"]],
+["最近のプロジェクト","A Project I Am Working On",["What is the goal of the project?","What is your part in it?"]],
+["仕事で大変だったこと","A Difficult Moment at Work",["What happened?","How did you handle it?"]],
+["一緒に働く人たち","The People I Work With",["Who is on your team?","What do you like about working with them?"]],
+["仕事で使うツール","Tools I Use at Work",["What tools or software do you use?","How do they help you?"]],
+["今週の進捗報告","My Progress This Week",["What did you finish this week?","What will you do next week?"]],
+["会議の報告","Reporting on a Meeting",["What was the meeting about?","What was decided?"]],
+["私の役割と責任","My Role and Responsibilities",["What are you in charge of?","Why is your role important?"]],
+["キャリアの経緯","How I Got This Job",["What did you do before?","Why did you choose this path?"]],
+["仕事のやりがい","What Makes My Job Rewarding",["What do you enjoy most?","Can you give an example?"]]
+]},
+{phase:3, name:"Phase 3|国際協力・意見", items:[
+["最も関心のあるSDGs目標","The SDG I Care About Most",["Which goal is it?","Why does it matter to you?"]],
+["気候変動について思うこと","My Thoughts on Climate Change",["How does it affect the world?","What should we do about it?"]],
+["教育の重要性","Why Education Matters",["What can education change?","What is one problem to solve?"]],
+["日本の国際協力の役割","Japan's Role in International Cooperation",["What is Japan good at?","What should Japan do more of?"]],
+["貧困をなくすには","How Can We End Poverty?",["What causes poverty?","What is one effective approach?"]],
+["ジェンダー平等について","On Gender Equality",["Why is it important?","What progress have you seen?"]],
+["支援で大切なこと","What Good Support Looks Like",["What makes support effective?","What should we avoid?"]],
+["現地パートナーとの協働","Working with Local Partners",["Why are local partners essential?","What is our role?"]],
+["寄付を集めるには","How to Encourage Donations",["Why do people donate?","How can we build trust?"]],
+["10年後の世界","The World in Ten Years",["What will be better?","What worries you?"]],
+["若者に伝えたいこと","A Message to Young People",["What do you want them to know?","What can they do now?"]],
+["なぜこの仕事を選んだか","Why I Chose This Work",["What inspired you?","What keeps you going?"]]
+]}
+];
+
+/* ================= STATE ================= */
+const KEY = "bridge_v1";
+let S = {vocab:{}, custom:[], sak:{}, log:{}, newLog:{}, settings:{rate:0.95, voice:""}};
+try{ const raw = localStorage.getItem(KEY); if(raw){ S = Object.assign(S, JSON.parse(raw)); } }catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function todayStr(d){ d = d || new Date(); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
+function addDays(str, n){ const d = new Date(str+"T12:00:00"); d.setDate(d.getDate()+n); return todayStr(d); }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ================= TABS ================= */
+const tabs = document.querySelectorAll("nav.tabs button");
+tabs.forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+function showTab(name){
+  speechSynthesis.cancel();
+  tabs.forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll("section.tab").forEach(s => s.classList.toggle("active", s.id === "tab-"+name));
+  if(name==="home") renderHome();
+  if(name==="vocab") renderVocabHome();
+  if(name==="sak") renderSakHome();
+  if(name==="shadow") renderShadowList();
+  if(name==="speech") renderSpeechHome();
+  window.scrollTo(0,0);
+}
+
+/* ================= HOME ================= */
+const DAY_TASKS = () => {
+  const dow = new Date().getDay(); // 0=Sun
+  const speechDay = (dow===0 || dow===3 || dow===6);
+  return [
+    {t:"単語(日→英)", s:"15分|新規+復習", min:15, tab:"vocab", dot:"var(--dot-vocab)"},
+    {t:"口頭英作文", s:"15分|詰まらず言えるまで", min:15, tab:"sak", dot:"var(--dot-sak)"},
+    {t:"シャドーイング", s:"20分|同じ素材を1週間", min:20, tab:"shadow", dot:"var(--dot-shadow)"},
+    speechDay
+      ? {t:"1分間スピーチ", s:"10分|録音→聞き直し→再録音", min:10, tab:"speech", dot:"var(--dot-speech)"}
+      : {t:"多聴", s:"10分|elllo など理解できる素材", min:10, tab:"", dot:"var(--dot-listen)"}
+  ];
+};
+function renderHome(){
+  document.getElementById("hdrDate").textContent = new Date().toLocaleDateString("ja-JP",{month:"long",day:"numeric",weekday:"short"});
+  const today = todayStr();
+  const log = S.log[today] || [false,false,false,false];
+  const tasksEl = document.getElementById("taskList");
+  tasksEl.innerHTML = "";
+  DAY_TASKS().forEach((task,i) => {
+    const div = document.createElement("div");
+    div.className = "task" + (log[i] ? " done" : "");
+    div.innerHTML =
+      '<button class="chk" type="button" aria-label="完了にする">'+(log[i]?"✓":"")+'</button>' +
+      '<span class="dot" style="background:'+task.dot+'"></span>' +
+      '<div class="info"><div class="t">'+esc(task.t)+'</div><div class="s">'+esc(task.s)+'</div></div>' +
+      '<button class="go" type="button">▶ '+task.min+'分</button>';
+    div.querySelector(".chk").addEventListener("click", () => {
+      const l = S.log[today] || [false,false,false,false];
+      l[i] = !l[i]; S.log[today] = l; save(); renderHome();
+    });
+    div.querySelector(".go").addEventListener("click", () => {
+      startTimer(task.min*60, task.t);
+      if(task.tab) showTab(task.tab);
+    });
+    tasksEl.appendChild(div);
+  });
+  // streak: consecutive days where core (task0 && task1) done
+  let streak = 0; let d = today;
+  const coreDone = day => { const l = S.log[day]; return !!(l && l[0] && l[1]); };
+  if(!coreDone(d)) d = addDays(d,-1); // today not done yet doesn't break streak
+  while(coreDone(d)){ streak++; d = addDays(d,-1); }
+  document.getElementById("streakNum").textContent = streak;
+  // week strip (last 7 days, ending today)
+  const strip = document.getElementById("weekStrip"); strip.innerHTML = "";
+  const names = ["日","月","火","水","木","金","土"];
+  for(let i=6;i>=0;i--){
+    const day = addDays(today,-i);
+    const l = S.log[day];
+    const full = !!(l && l.every(Boolean));
+    const core = !!(l && l[0] && l[1]);
+    const el = document.createElement("div");
+    el.className = "d";
+    el.innerHTML = '<div class="c '+(full?"full":(core?"core":""))+'">'+(full?"✓":(core?"◐":""))+'</div>'+names[new Date(day+"T12:00:00").getDay()];
+    strip.appendChild(el);
+  }
+  // phase card
+  const doneDays = Object.keys(S.log).filter(k => { const l=S.log[k]; return l && l[0] && l[1]; }).length;
+  const week = Math.min(12, Math.floor(doneDays/6)+1);
+  const phase = week<=4 ? ["Phase 1(1〜4週)|土台づくり","単語600を1周・口頭英作文Basic完了・身近なテーマでスピーチ。シャドーイングはA2素材でOK。"]
+            : week<=8 ? ["Phase 2(5〜8週)|速度への対応","シャドーイングをB1素材へ。スピーチは仕事テーマに移行。マイ専門用語帳スタート。"]
+            : ["Phase 3(9〜12週)|実戦投入","週2で実際に話す場(オンライン英会話/AI英会話)。スピーチのネタをレッスンで使い回す。"];
+  document.getElementById("phaseCard").innerHTML =
+    '<span class="pill">'+esc("推定 WEEK "+week)+'</span> <strong>'+esc(phase[0])+'</strong><br>'+esc(phase[1])+
+    '<br><span class="muted">※ コア達成日数から推定(6日=1週換算)</span>';
+}
+
+/* ================= TIMER ================= */
+let timer = {left:0, id:null, paused:false};
+const timerBar = document.getElementById("timerBar");
+function startTimer(sec, label){
+  stopTimer();
+  timer.left = sec; timer.paused = false;
+  document.getElementById("timerLabel").textContent = label;
+  timerBar.classList.add("on");
+  tick();
+  timer.id = setInterval(tick, 1000);
+}
+function tick(){
+  if(timer.paused) return;
+  const m = Math.floor(timer.left/60), s = timer.left%60;
+  document.getElementById("timerTime").textContent = String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  if(timer.left <= 0){ stopTimer(); beep(); return; }
+  timer.left--;
+}
+function stopTimer(){ if(timer.id){ clearInterval(timer.id); timer.id=null; } timerBar.classList.remove("on"); }
+document.getElementById("timerStop").addEventListener("click", stopTimer);
+document.getElementById("timerPause").addEventListener("click", e => {
+  timer.paused = !timer.paused;
+  e.target.textContent = timer.paused ? "再開" : "一時停止";
+});
+function beep(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    [0,0.35,0.7].forEach(t => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = 880; g.gain.setValueAtTime(0.2, ctx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+t+0.3);
+      o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+0.3);
+    });
+  }catch(e){}
+}
+
+/* ================= TTS ================= */
+let voices = [];
+function loadVoices(){
+  voices = speechSynthesis.getVoices().filter(v => v.lang && v.lang.toLowerCase().startsWith("en"));
+  const sel = document.getElementById("voiceSel");
+  sel.innerHTML = "";
+  voices.forEach((v,i) => {
+    const o = document.createElement("option");
+    o.value = v.name; o.textContent = v.name + " ("+v.lang+")";
+    sel.appendChild(o);
+  });
+  if(S.settings.voice && voices.some(v=>v.name===S.settings.voice)) sel.value = S.settings.voice;
+  else {
+    const pref = voices.find(v=>/Samantha|Google US|Aaron|Karen|Daniel/i.test(v.name)) || voices.find(v=>v.lang==="en-US") || voices[0];
+    if(pref) sel.value = pref.name;
+  }
+}
+loadVoices();
+if(typeof speechSynthesis !== "undefined") speechSynthesis.onvoiceschanged = loadVoices;
+document.getElementById("voiceSel").addEventListener("change", e => { S.settings.voice = e.target.value; save(); });
+function speak(text, rate, onend){
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const v = voices.find(x => x.name === document.getElementById("voiceSel").value);
+  if(v) u.voice = v;
+  u.lang = (v && v.lang) || "en-US";
+  u.rate = rate || S.settings.rate || 0.95;
+  if(onend) u.onend = onend;
+  speechSynthesis.speak(u);
+  return u;
+}
+
+/* ================= VOCAB ================= */
+function allTerms(){ return VOCAB.concat(S.custom); }
+function vocabState(id){ return S.vocab[id]; }
+const INTERVALS = [1,2,4,7,14,30];
+function buildVocabQueue(){
+  const today = todayStr();
+  const due = [], fresh = [];
+  allTerms().forEach(t => {
+    const st = S.vocab[t.id];
+    if(st){ if(st.due <= today) due.push(t); }
+    else fresh.push(t);
+  });
+  const newToday = (S.newLog[today]||0);
+  const newCap = Math.max(0, 10 - newToday);
+  return due.concat(fresh.slice(0, newCap));
+}
+function renderVocabHome(){
+  const today = todayStr();
+  const learned = Object.keys(S.vocab).length;
+  const mastered = Object.values(S.vocab).filter(s=>s.box>=4).length;
+  const queue = buildVocabQueue();
+  document.getElementById("vocabDrill").style.display = "none";
+  const el = document.getElementById("vocabHome");
+  el.style.display = "";
+  el.innerHTML =
+    '<div style="display:flex;gap:18px;margin-bottom:12px">'+
+    '<div><div style="font-weight:800;font-size:1.5rem;font-variant-numeric:tabular-nums">'+queue.length+'</div><div class="muted small">今日のカード</div></div>'+
+    '<div><div style="font-weight:800;font-size:1.5rem;font-variant-numeric:tabular-nums">'+learned+'<span class="muted" style="font-size:.9rem;font-weight:400">/'+allTerms().length+'</span></div><div class="muted small">学習済み</div></div>'+
+    '<div><div style="font-weight:800;font-size:1.5rem;font-variant-numeric:tabular-nums">'+mastered+'</div><div class="muted small">定着(Box4+)</div></div>'+
+    '</div>'+
+    (queue.length
+      ? '<button class="btn primary" id="startVocab" type="button" style="width:100%">今日の単語を始める</button>'
+      : '<p class="muted center" style="margin:6px 0">今日の分は完了!また明日 🎉</p>');
+  const b = document.getElementById("startVocab");
+  if(b) b.addEventListener("click", () => startVocabDrill(queue));
+}
+function startVocabDrill(queue){
+  const drill = document.getElementById("vocabDrill");
+  document.getElementById("vocabHome").style.display = "none";
+  drill.style.display = "";
+  let i = 0; const total = queue.length; let doneCount = 0;
+  const today = todayStr();
+  function show(){
+    if(i >= queue.length){ drill.style.display="none"; renderVocabHome(); return; }
+    const t = queue[i];
+    const isNew = !S.vocab[t.id];
+    drill.innerHTML =
+      '<div class="progress"><i style="width:'+Math.round(doneCount/Math.max(total,1)*100)+'%"></i></div>'+
+      '<div class="drillcard">'+
+      (isNew?'<span class="pill" style="align-self:center">NEW</span>':'')+
+      '<div class="q">'+esc(t.jp)+'</div>'+
+      '<div id="ansArea"><button class="btn primary" id="revealBtn" type="button">答えを見る</button></div>'+
+      '</div>';
+    document.getElementById("revealBtn").addEventListener("click", () => {
+      document.getElementById("ansArea").innerHTML =
+        '<div class="a">'+esc(t.en)+' <button class="btn ghost" id="sayBtn" type="button" aria-label="発音を聞く">🔊</button></div>'+
+        '<div class="btnrow" style="margin-top:10px">'+
+        '<button class="btn warn" id="ngBtn" type="button">言えなかった</button>'+
+        '<button class="btn good" id="okBtn" type="button">言えた</button></div>';
+      document.getElementById("sayBtn").addEventListener("click", () => speak(t.en));
+      speak(t.en);
+      document.getElementById("ngBtn").addEventListener("click", () => grade(t, false));
+      document.getElementById("okBtn").addEventListener("click", () => grade(t, true));
+    });
+  }
+  function grade(t, ok){
+    const wasNew = !S.vocab[t.id];
+    if(wasNew){ S.newLog[today] = (S.newLog[today]||0)+1; }
+    let st = S.vocab[t.id] || {box:0, due:today};
+    if(ok){
+      st.box = Math.min(st.box+1, 5);
+      st.due = addDays(today, INTERVALS[st.box-1] || 1);
+      doneCount++;
+    } else {
+      st.box = 0; st.due = today;
+      queue.push(t); // 同じセッション内で再挑戦
+    }
+    S.vocab[t.id] = st; save();
+    i++; show();
+  }
+  show();
+}
+document.getElementById("addTermBtn").addEventListener("click", () => {
+  const jp = document.getElementById("addJp").value.trim();
+  const en = document.getElementById("addEn").value.trim();
+  const msg = document.getElementById("addMsg");
+  if(!jp || !en){ msg.textContent = "日本語と英語の両方を入力してください。"; return; }
+  S.custom.push({id:"c"+Date.now(), jp:jp, en:en}); save();
+  document.getElementById("addJp").value = ""; document.getElementById("addEn").value = "";
+  msg.textContent = "「"+jp+"」を追加しました。明日以降のNEWカードに出てきます。";
+  renderVocabHome();
+});
+
+/* ================= SAKUBUN ================= */
+function sakId(setKey, idx){ return setKey+"-"+idx; }
+function renderSakHome(){
+  document.getElementById("sakDrill").style.display = "none";
+  const home = document.getElementById("sakHome");
+  home.style.display = ""; home.innerHTML = "";
+  SAK_SETS.forEach(set => {
+    const parts = set.name.split("|");
+    const ok = set.items.filter((_,i)=>S.sak[sakId(set.key,i)]==="ok").length;
+    const ng = set.items.filter((_,i)=>S.sak[sakId(set.key,i)]==="ng").length;
+    const btn = document.createElement("button");
+    btn.className = "rowbtn"; btn.type = "button";
+    btn.innerHTML =
+      '<div class="info"><div class="t">'+esc(parts[0])+' <span class="muted" style="font-weight:400">'+esc(parts[1])+'</span></div>'+
+      '<div class="s">言えた '+ok+'/'+set.items.length+(ng?'|要復習 '+ng:'')+'</div>'+
+      '<div class="progress" style="margin:6px 0 0"><i style="width:'+Math.round(ok/set.items.length*100)+'%"></i></div></div>'+
+      '<span class="arr">›</span>';
+    btn.addEventListener("click", () => startSakDrill(set));
+    home.appendChild(btn);
+  });
+}
+function startSakDrill(set){
+  document.getElementById("sakHome").style.display = "none";
+  const drill = document.getElementById("sakDrill");
+  drill.style.display = "";
+  // 出題順: 言えなかった → 未挑戦 → 言えた(復習)。1セッション15問。
+  const idxs = set.items.map((_,i)=>i);
+  const ngs = idxs.filter(i=>S.sak[sakId(set.key,i)]==="ng");
+  const news = idxs.filter(i=>!S.sak[sakId(set.key,i)]);
+  const oks = idxs.filter(i=>S.sak[sakId(set.key,i)]==="ok");
+  const queue = ngs.concat(news).concat(oks).slice(0,15);
+  let pos = 0;
+  function show(){
+    if(pos >= queue.length){ drill.style.display="none"; renderSakHome(); return; }
+    const i = queue[pos];
+    const item = set.items[i];
+    drill.innerHTML =
+      '<button class="backlink" id="sakBack" type="button">‹ セット一覧へ</button>'+
+      '<div class="progress"><i style="width:'+Math.round(pos/queue.length*100)+'%"></i></div>'+
+      '<div class="drillcard">'+
+      '<div class="muted small">'+(pos+1)+' / '+queue.length+'</div>'+
+      '<div class="q">'+esc(item[0])+'</div>'+
+      '<div id="sakAns"><button class="btn primary" id="sakReveal" type="button">答えを見る</button></div>'+
+      '</div>';
+    document.getElementById("sakBack").addEventListener("click", () => { speechSynthesis.cancel(); renderSakHome(); });
+    document.getElementById("sakReveal").addEventListener("click", () => {
+      document.getElementById("sakAns").innerHTML =
+        '<div class="a">'+esc(item[1])+' <button class="btn ghost" id="sakSay" type="button" aria-label="発音を聞く">🔊</button></div>'+
+        '<div class="muted small" style="margin-top:4px">3回、声に出して繰り返す</div>'+
+        '<div class="btnrow" style="margin-top:10px">'+
+        '<button class="btn warn" id="sakNg" type="button">言えなかった</button>'+
+        '<button class="btn good" id="sakOk" type="button">言えた</button></div>';
+      speak(item[1]);
+      document.getElementById("sakSay").addEventListener("click", () => speak(item[1]));
+      document.getElementById("sakNg").addEventListener("click", () => { S.sak[sakId(set.key,i)]="ng"; save(); pos++; show(); });
+      document.getElementById("sakOk").addEventListener("click", () => { S.sak[sakId(set.key,i)]="ok"; save(); pos++; show(); });
+    });
+  }
+  show();
+}
+
+/* ================= SHADOWING ================= */
+function renderShadowList(){
+  document.getElementById("shadowDetail").style.display = "none";
+  const list = document.getElementById("shadowList");
+  list.style.display = ""; list.innerHTML =
+    '<p class="muted small" style="margin:0 4px 10px">同じ素材を1週間使う:聴く→意味確認→オーバーラッピング→シャドーイング→仕上げに1.2倍速。文をタップすると1文だけ再生できます。</p>';
+  SCRIPTS.forEach(sc => {
+    const btn = document.createElement("button");
+    btn.className = "rowbtn"; btn.type = "button";
+    btn.innerHTML =
+      '<span class="pill'+(sc.level==="A2"?" good":(sc.level==="B2"?" warn":""))+'">'+sc.level+'</span>'+
+      '<div class="info"><div class="t">'+esc(sc.title)+'</div><div class="s">'+esc(sc.jpTitle)+'|Phase '+sc.phase+'|'+sc.sents.length+'文</div></div>'+
+      '<span class="arr">›</span>';
+    btn.addEventListener("click", () => renderShadowDetail(sc));
+    list.appendChild(btn);
+  });
+}
+let shadowPlaying = false;
+function renderShadowDetail(sc){
+  document.getElementById("shadowList").style.display = "none";
+  const d = document.getElementById("shadowDetail");
+  d.style.display = "";
+  let showJp = false;
+  const rate = S.settings.rate || 0.95;
+  d.innerHTML =
+    '<button class="backlink" id="shBack" type="button">‹ 教材一覧へ</button>'+
+    '<div class="card">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'+
+    '<div><span class="pill">'+sc.level+'</span> <strong>'+esc(sc.title)+'</strong><div class="muted small">'+esc(sc.jpTitle)+'</div></div>'+
+    '</div>'+
+    '<div class="controls">'+
+    '<button class="btn primary" id="shPlay" type="button">▶ 全文再生</button>'+
+    '<button class="btn" id="shJp" type="button">訳を表示</button>'+
+    '</div>'+
+    '<div class="controls">'+
+    '<label for="shRate">速度 <span id="shRateVal">'+rate.toFixed(2)+'</span>x</label>'+
+    '<input type="range" id="shRate" min="0.7" max="1.2" step="0.05" value="'+rate+'">'+
+    '</div>'+
+    '<div class="script" id="shText"></div>'+
+    '<div class="vocabnote" id="shVocab"></div>'+
+    '</div>';
+  document.getElementById("shBack").addEventListener("click", () => { speechSynthesis.cancel(); shadowPlaying=false; renderShadowList(); });
+  const textEl = document.getElementById("shText");
+  function renderText(){
+    textEl.innerHTML = "";
+    sc.sents.forEach((pair, i) => {
+      const span = document.createElement("span");
+      span.className = "sent"; span.id = "sent-"+i; span.tabIndex = 0;
+      span.textContent = pair[0] + " ";
+      span.addEventListener("click", () => playOne(i));
+      span.addEventListener("keydown", e => { if(e.key==="Enter"||e.key===" "){ e.preventDefault(); playOne(i);} });
+      textEl.appendChild(span);
+      if(showJp){
+        const jp = document.createElement("span");
+        jp.className = "jp-line"; jp.textContent = pair[1];
+        textEl.appendChild(jp);
+      }
+    });
+  }
+  renderText();
+  const vEl = document.getElementById("shVocab");
+  vEl.innerHTML = '<div class="muted small" style="margin-bottom:6px;font-weight:700">キー表現</div>' +
+    sc.vocab.map(v => '<div><dt>'+esc(v[0])+'</dt><dd>'+esc(v[1])+'</dd></div>').join("");
+  function curRate(){ return parseFloat(document.getElementById("shRate").value); }
+  document.getElementById("shRate").addEventListener("input", e => {
+    document.getElementById("shRateVal").textContent = parseFloat(e.target.value).toFixed(2);
+    S.settings.rate = parseFloat(e.target.value); save();
+  });
+  function highlight(i){
+    sc.sents.forEach((_,j) => {
+      const el = document.getElementById("sent-"+j);
+      if(el) el.classList.toggle("playing", j===i);
+    });
+  }
+  function playOne(i){
+    shadowPlaying = false;
+    highlight(i);
+    speak(sc.sents[i][0], curRate(), () => highlight(-1));
+  }
+  function playAll(i){
+    if(i >= sc.sents.length){ shadowPlaying=false; highlight(-1); document.getElementById("shPlay").textContent="▶ 全文再生"; return; }
+    highlight(i);
+    speak(sc.sents[i][0], curRate(), () => { if(shadowPlaying) playAll(i+1); });
+  }
+  document.getElementById("shPlay").addEventListener("click", () => {
+    if(shadowPlaying){ shadowPlaying=false; speechSynthesis.cancel(); highlight(-1); document.getElementById("shPlay").textContent="▶ 全文再生"; return; }
+    shadowPlaying = true;
+    document.getElementById("shPlay").textContent = "■ 停止";
+    playAll(0);
+  });
+  document.getElementById("shJp").addEventListener("click", e => {
+    showJp = !showJp; e.target.textContent = showJp ? "訳を隠す" : "訳を表示";
+    renderText();
+  });
+}
+
+/* ================= SPEECH ================= */
+function renderSpeechHome(){
+  stopRecordingCleanup();
+  document.getElementById("speechDetail").style.display = "none";
+  const home = document.getElementById("speechHome");
+  home.style.display = ""; home.innerHTML =
+    '<div class="card center"><button class="btn primary" id="randTheme" type="button" style="width:100%">🎲 今日のテーマをランダムに選ぶ</button>'+
+    '<p class="muted small" style="margin:8px 0 0">録音 → 聞き直し → 言えなかった表現を調べる → もう一度録音、が1セット。</p></div>';
+  document.getElementById("randTheme").addEventListener("click", () => {
+    const all = [];
+    THEMES.forEach(g => g.items.forEach(it => all.push(it)));
+    renderSpeechDetail(all[Math.floor(Math.random()*all.length)]);
+  });
+  THEMES.forEach(group => {
+    const h = document.createElement("h2");
+    const parts = group.name.split("|");
+    h.innerHTML = '<span class="eyebrow">'+esc(parts[0])+'</span> '+esc(parts[1]);
+    home.appendChild(h);
+    group.items.forEach(item => {
+      const btn = document.createElement("button");
+      btn.className = "rowbtn"; btn.type = "button";
+      btn.innerHTML = '<div class="info"><div class="t">'+esc(item[0])+'</div><div class="s">'+esc(item[1])+'</div></div><span class="arr">›</span>';
+      btn.addEventListener("click", () => renderSpeechDetail(item));
+      home.appendChild(btn);
+    });
+  });
+}
+let rec = {media:null, recorder:null, chunks:[], timerId:null, sec:60};
+function stopRecordingCleanup(){
+  if(rec.timerId){ clearInterval(rec.timerId); rec.timerId = null; }
+  if(rec.recorder && rec.recorder.state !== "inactive"){ try{ rec.recorder.stop(); }catch(e){} }
+  if(rec.media){ rec.media.getTracks().forEach(t=>t.stop()); rec.media = null; }
+}
+function renderSpeechDetail(item){
+  document.getElementById("speechHome").style.display = "none";
+  const d = document.getElementById("speechDetail");
+  d.style.display = "";
+  d.innerHTML =
+    '<button class="backlink" id="spBack" type="button">‹ テーマ一覧へ</button>'+
+    '<div class="card">'+
+    '<div class="center"><strong style="font-size:1.15rem">'+esc(item[0])+'</strong><div class="muted">'+esc(item[1])+'</div></div>'+
+    '<div class="small" style="margin-top:10px;font-weight:700">ヒント(この問いに答える形で)</div>'+
+    '<ul class="hints">'+item[2].map(h=>'<li>'+esc(h)+'</li>').join("")+'</ul>'+
+    '<div class="bigtimer" id="spTimer">1:00</div>'+
+    '<div class="btnrow">'+
+    '<button class="btn primary" id="spStart" type="button">● 録音して開始</button>'+
+    '<button class="btn" id="spTimerOnly" type="button">タイマーのみ</button>'+
+    '</div>'+
+    '<div id="spResult"></div>'+
+    '<p class="muted small" style="margin:12px 0 0">詰まってもOK。まず1分間、止まらずに話し続けることが目標。終わったら聞き直して、言えなかった表現をメモ→単語タブに追加。</p>'+
+    '</div>';
+  document.getElementById("spBack").addEventListener("click", () => { stopRecordingCleanup(); renderSpeechHome(); });
+  const timerEl = document.getElementById("spTimer");
+  function runCountdown(onDone){
+    let left = 60;
+    timerEl.textContent = "1:00";
+    rec.timerId = setInterval(() => {
+      left--;
+      timerEl.textContent = Math.floor(left/60)+":"+String(left%60).padStart(2,"0");
+      if(left<=0){ clearInterval(rec.timerId); rec.timerId=null; beep(); if(onDone) onDone(); }
+    }, 1000);
+  }
+  document.getElementById("spTimerOnly").addEventListener("click", () => {
+    if(rec.timerId){ clearInterval(rec.timerId); rec.timerId=null; timerEl.textContent="1:00"; return; }
+    runCountdown();
+  });
+  document.getElementById("spStart").addEventListener("click", async (e) => {
+    const btn = e.target;
+    if(rec.recorder && rec.recorder.state === "recording"){
+      rec.recorder.stop();
+      if(rec.timerId){ clearInterval(rec.timerId); rec.timerId=null; }
+      return;
+    }
+    if(!navigator.mediaDevices || !window.MediaRecorder){
+      document.getElementById("spResult").innerHTML = '<p class="muted small">この環境では録音を利用できません。タイマーのみで練習し、スマホの標準ボイスメモで録音してください。</p>';
+      runCountdown();
+      return;
+    }
+    try{
+      rec.media = await navigator.mediaDevices.getUserMedia({audio:true});
+    }catch(err){
+      document.getElementById("spResult").innerHTML = '<p class="muted small">マイクを利用できませんでした(許可が必要です)。タイマーのみで練習できます。</p>';
+      runCountdown();
+      return;
+    }
+    rec.chunks = [];
+    rec.recorder = new MediaRecorder(rec.media);
+    rec.recorder.ondataavailable = ev => { if(ev.data.size) rec.chunks.push(ev.data); };
+    rec.recorder.onstop = () => {
+      const blob = new Blob(rec.chunks, {type: rec.recorder.mimeType || "audio/webm"});
+      const url = URL.createObjectURL(blob);
+      const ext = (blob.type.includes("mp4")||blob.type.includes("aac")) ? "m4a" : "webm";
+      const fname = "speech_"+todayStr()+"."+ext;
+      document.getElementById("spResult").innerHTML =
+        '<audio controls src="'+url+'"></audio>'+
+        '<div class="btnrow" style="margin-top:8px"><a class="btn" download="'+fname+'" href="'+url+'" style="text-decoration:none;color:inherit">⬇ 録音を保存</a></div>'+
+        '<p class="muted small" style="margin:8px 0 0">週1回は保存して、先週の自分と聞き比べを。</p>';
+      btn.textContent = "● 録音して開始";
+      if(rec.media){ rec.media.getTracks().forEach(t=>t.stop()); rec.media=null; }
+    };
+    rec.recorder.start();
+    btn.textContent = "■ 録音を止める";
+    document.getElementById("spResult").innerHTML = "";
+    runCountdown(() => { if(rec.recorder && rec.recorder.state==="recording") rec.recorder.stop(); });
+  });
+}
+
+/* ================= INIT ================= */
+renderHome();
+</script>
