@@ -1047,14 +1047,14 @@ function renderSpeechDetail(item){
       return;
     }
     if(!navigator.mediaDevices || !window.MediaRecorder){
-      document.getElementById("spResult").innerHTML = '<p class="muted small">この環境では録音を利用できません。タイマーのみで練習し、スマホの標準ボイスメモで録音してください。</p>';
+      document.getElementById("spResult").innerHTML = '<p class="muted small">この画面では録音を利用できません。<strong>ボイスメモで録音を開始してからこの画面に戻り、「タイマーのみ」で練習</strong>してください(ボイスメモはバックグラウンドでも録音され続けます)。</p>';
       runCountdown();
       return;
     }
     try{
       rec.media = await navigator.mediaDevices.getUserMedia({audio:true});
     }catch(err){
-      document.getElementById("spResult").innerHTML = '<p class="muted small">マイクを利用できませんでした(許可が必要です)。タイマーのみで練習できます。</p>';
+      document.getElementById("spResult").innerHTML = '<p class="muted small">マイクを利用できませんでした。アプリ内ビューアではマイクが使えないことがあります。<strong>おすすめ:ボイスメモで録音を開始してからこの画面に戻り、「タイマーのみ」で練習</strong>(ボイスメモはバックグラウンドでも録音され続け、日付付きで自動保存されます)。Safariで開くと録音できる場合もあります。</p>';
       runCountdown();
       return;
     }
