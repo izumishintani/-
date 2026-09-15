@@ -120,7 +120,7 @@ nav.tabs{
   display:flex;justify-content:space-around;
   padding:6px 4px calc(6px + env(safe-area-inset-bottom));
 }
-nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;color:var(--muted);font-size:.68rem;padding:4px 8px;min-width:56px}
+nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;color:var(--muted);font-size:.66rem;padding:4px 4px;min-width:46px}
 nav.tabs button .ic{font-size:1.25rem;line-height:1}
 nav.tabs button.active{color:var(--accent);font-weight:700}
 .backlink{background:transparent;color:var(--accent);font-weight:600;padding:8px 4px;margin:8px 0 0}
@@ -203,6 +203,13 @@ nav.tabs button.active{color:var(--accent);font-weight:700}
   </div>
 </section>
 
+<!-- ============ LISTEN ============ -->
+<section class="tab" id="tab-listen">
+  <h2><span class="dot" style="background:var(--dot-listen)"></span>多聴</h2>
+  <div id="listenList"></div>
+  <div id="listenDetail" style="display:none"></div>
+</section>
+
 <!-- ============ SPEECH ============ -->
 <section class="tab" id="tab-speech">
   <h2><span class="dot" style="background:var(--dot-speech)"></span>1分間スピーチ</h2>
@@ -226,6 +233,7 @@ nav.tabs button.active{color:var(--accent);font-weight:700}
   <button data-tab="vocab" type="button"><span class="ic">🗂</span>単語</button>
   <button data-tab="sak" type="button"><span class="ic">💬</span>英作文</button>
   <button data-tab="shadow" type="button"><span class="ic">🎧</span>シャドー</button>
+  <button data-tab="listen" type="button"><span class="ic">🎵</span>多聴</button>
   <button data-tab="speech" type="button"><span class="ic">🎤</span>スピーチ</button>
 </nav>
 
@@ -457,6 +465,117 @@ const SCRIPTS = [
   ["Progress counts only when it counts everyone.","進歩は、すべての人を数に入れて初めて意味を持ちます。"]],
  vocab:[["radical","根源的な"],["excluded","排除された"],["average","平均"],["left out","取り残されて"],["vulnerable","脆弱な"]]}];
 
+const LISTEN = [
+{id:"l1", level:"A2", title:"A Morning at the Office", jpTitle:"オフィスの朝",
+ sents:[
+  ["I arrive at the office at nine o'clock.","私は9時に事務所に着きます。"],
+  ["First, I make a cup of coffee and turn on my computer.","まずコーヒーをいれて、パソコンをつけます。"],
+  ["I have about thirty new emails every morning.","毎朝30通ほど新しいメールがあります。"],
+  ["Most of them are from our partners in other countries.","ほとんどは海外のパートナーからです。"],
+  ["I answer the important ones first.","大事なものから返信します。"],
+  ["At ten, my team has a short meeting.","10時にチームの短い会議があります。"],
+  ["We stand in a circle and share our plans for the day.","輪になって立ち、今日の予定を共有します。"],
+  ["It takes only fifteen minutes.","たった15分で終わります。"],
+  ["After the meeting, I work on a report.","会議のあとは報告書に取り組みます。"],
+  ["My boss needs it by Friday.","上司が金曜日までに必要としています。"],
+  ["At twelve thirty, I have lunch with my coworkers.","12時半に同僚と昼食をとります。"],
+  ["We talk about food, weather, and sometimes work.","食べ物や天気、ときどき仕事の話をします。"],
+  ["The afternoon is always busy, but I like my mornings.","午後はいつも忙しいですが、私は朝の時間が好きです。"]]},
+{id:"l2", level:"A2", title:"The Weekend Market", jpTitle:"週末の市場",
+ sents:[
+  ["Every Saturday, there is a market near my house.","毎週土曜日、家の近くで市場が開かれます。"],
+  ["Farmers come from small villages to sell fruits and vegetables.","農家の人たちが小さな村から果物や野菜を売りに来ます。"],
+  ["Everything is fresh and cheap.","どれも新鮮で安いです。"],
+  ["My favorite shop sells tomatoes and sweet corn.","お気に入りの店はトマトとスイートコーンを売っています。"],
+  ["The owner is a friendly old man.","店主は気さくなおじいさんです。"],
+  ["He always gives me a little extra.","いつも少しおまけしてくれます。"],
+  ["Last week, I bought too many oranges.","先週はオレンジを買いすぎました。"],
+  ["I made juice and gave some to my neighbor.","ジュースを作って、近所の人におすそ分けしました。"],
+  ["She was very happy and gave me some cookies.","彼女はとても喜んで、クッキーをくれました。"],
+  ["A market is not just a place for shopping.","市場は買い物のためだけの場所ではありません。"],
+  ["It is a place where people meet and talk.","人々が出会い、語らう場所なのです。"]]},
+{id:"l3", level:"A2", title:"A New Volunteer", jpTitle:"新人ボランティア",
+ sents:[
+  ["Ken started volunteering last month.","ケンは先月ボランティアを始めました。"],
+  ["Every Sunday, he helps at a food bank in his city.","毎週日曜日、市内のフードバンクで手伝いをします。"],
+  ["The food bank collects food from shops and families.","フードバンクは店や家庭から食品を集めます。"],
+  ["Then it gives the food to people who need it.","そして必要な人々に届けます。"],
+  ["Ken's job is to check the food and put it in boxes.","ケンの仕事は食品を確認して箱に詰めることです。"],
+  ["The work is simple, but it is important.","単純な作業ですが、大切な仕事です。"],
+  ["At first, he was nervous because he didn't know anyone.","最初は知り合いがいなくて緊張しました。"],
+  ["Now he has many friends there.","今ではそこにたくさんの友人ができました。"],
+  ["\"I get more than I give,\" he says.","「与える以上のものをもらっています」と彼は言います。"],
+  ["Small actions by many people can make a big difference.","多くの人の小さな行動が、大きな変化を生むのです。"]]},
+{id:"l4", level:"B1", title:"The Village School", jpTitle:"村の学校",
+ sents:[
+  ["In a small village in East Africa, there is a school with just two rooms.","東アフリカの小さな村に、教室が2つだけの学校があります。"],
+  ["Sixty children study there every day.","毎日60人の子どもたちが学んでいます。"],
+  ["Some of them walk more than an hour to get to school.","1時間以上歩いて通う子もいます。"],
+  ["The school had no clean water until last year.","昨年まで、学校には安全な水がありませんでした。"],
+  ["Children often got sick, and many stayed home.","子どもたちはよく病気になり、多くが家にとどまりました。"],
+  ["Then an NGO worked with the village to build a well.","その後、NGOが村と協力して井戸を作りました。"],
+  ["Now the children can drink safe water at school.","今では学校で安全な水が飲めます。"],
+  ["Attendance went up by thirty percent.","出席率は30%上がりました。"],
+  ["The teachers also started a small garden.","先生たちは小さな菜園も始めました。"],
+  ["Students grow vegetables and learn about nutrition.","生徒たちは野菜を育て、栄養について学びます。"],
+  ["The school is still small, but it is changing the future of the village.","学校はまだ小さいですが、村の未来を変えつつあります。"]]},
+{id:"l5", level:"B1", title:"A Small Loan, A Big Change", jpTitle:"小さな融資、大きな変化",
+ sents:[
+  ["Amina lives in a small town in South Asia.","アミナは南アジアの小さな町に住んでいます。"],
+  ["For years, she wanted to start her own business.","何年もの間、自分の商売を始めたいと思っていました。"],
+  ["But banks refused to lend her money.","しかし銀行はお金を貸してくれませんでした。"],
+  ["She had no land and no savings.","土地も貯金もなかったからです。"],
+  ["Then she heard about microfinance.","そんなとき、マイクロファイナンスのことを知りました。"],
+  ["It is a system that gives small loans to poor people.","貧しい人々に少額の融資をする仕組みです。"],
+  ["Amina borrowed one hundred dollars and bought a sewing machine.","アミナは100ドルを借りてミシンを買いました。"],
+  ["She started making clothes and selling them at the market.","服を作って市場で売り始めました。"],
+  ["In two years, she paid back the loan and hired two women.","2年で融資を返済し、2人の女性を雇いました。"],
+  ["Her daughters now go to school.","娘たちは今、学校に通っています。"],
+  ["A small loan cannot solve everything.","少額の融資がすべてを解決するわけではありません。"],
+  ["But for Amina, it opened a door.","しかしアミナにとって、それは扉を開くものでした。"]]},
+{id:"l6", level:"B1", title:"The Plastic Problem", jpTitle:"プラスチック問題",
+ sents:[
+  ["Every year, millions of tons of plastic go into the ocean.","毎年、数百万トンのプラスチックが海に流れ込んでいます。"],
+  ["Plastic bags and bottles do not disappear quickly.","レジ袋やペットボトルはすぐには分解されません。"],
+  ["They stay in the water for hundreds of years.","何百年も海に残り続けます。"],
+  ["Fish and sea birds often eat small pieces of plastic.","魚や海鳥はプラスチックの小さな破片を食べてしまいます。"],
+  ["This plastic can come back to us through the food we eat.","そのプラスチックは食べ物を通じて私たちに戻ってくることがあります。"],
+  ["Many countries are now taking action.","多くの国が今、対策を進めています。"],
+  ["Some have banned plastic bags completely.","レジ袋を完全に禁止した国もあります。"],
+  ["Companies are designing bottles that can be recycled easily.","企業はリサイクルしやすいボトルを設計しています。"],
+  ["We can also do simple things every day.","私たちも毎日簡単なことができます。"],
+  ["Bring your own bag, choose a reusable bottle, and say no to plastic straws.","マイバッグを持ち、水筒を選び、プラスチックストローを断ることです。"],
+  ["The ocean does not belong to one country.","海は一つの国のものではありません。"],
+  ["Protecting it is everyone's job.","海を守ることは、みんなの仕事です。"]]},
+{id:"l7", level:"B1+", title:"The Power of Vaccines", jpTitle:"ワクチンの力",
+ sents:[
+  ["Vaccines are one of the greatest successes in public health.","ワクチンは公衆衛生における最大の成功の一つです。"],
+  ["They protect people from dangerous diseases before they get sick.","病気になる前に、危険な感染症から人々を守ります。"],
+  ["Thanks to vaccines, smallpox disappeared from the world in 1980.","ワクチンのおかげで、天然痘は1980年に世界から姿を消しました。"],
+  ["Millions of children are saved every year.","毎年数百万人の子どもの命が救われています。"],
+  ["However, there is still a big challenge.","しかし、大きな課題も残っています。"],
+  ["In some remote areas, vaccines cannot reach the people who need them.","遠隔地では、必要な人々にワクチンが届かないのです。"],
+  ["Roads are poor, and there is no electricity to keep vaccines cold.","道路は悪く、ワクチンを冷やしておく電気もありません。"],
+  ["Health workers sometimes walk for days carrying special cool boxes.","保健員は特別な保冷箱を担いで何日も歩くことがあります。"],
+  ["New technology is helping, too.","新しい技術も助けになっています。"],
+  ["In some countries, drones now deliver vaccines to mountain villages.","一部の国では、ドローンが山あいの村にワクチンを届けています。"],
+  ["Good health should not depend on where you were born.","健康は、生まれた場所に左右されるべきではありません。"]]},
+{id:"l8", level:"B1+", title:"Cities of the Future", jpTitle:"未来の都市",
+ sents:[
+  ["More than half of the world's people now live in cities.","世界の人口の半分以上が今、都市に住んでいます。"],
+  ["By 2050, this number will grow even more.","2050年にはさらに増えるでしょう。"],
+  ["Cities use a lot of energy and produce a lot of waste.","都市は大量のエネルギーを使い、大量のごみを出します。"],
+  ["So the future of the planet depends on the future of cities.","だから地球の未来は都市の未来にかかっています。"],
+  ["Around the world, cities are trying new ideas.","世界中の都市が新しい取り組みを試しています。"],
+  ["Some are building fast bus systems instead of highways.","高速道路の代わりに快速バス網を整備する都市もあります。"],
+  ["Others are planting trees on rooftops to cool the streets.","屋上に木を植えて街を涼しくする都市もあります。"],
+  ["In one city, food waste from restaurants becomes gas for city buses.","ある都市では、飲食店の生ごみが市バスの燃料ガスになります。"],
+  ["Good cities are not only clean and green.","良い都市は、きれいで緑が多いだけではありません。"],
+  ["They are also fair, with safe housing and public transport for everyone.","誰もが安全な住まいと公共交通を使える、公正な都市でもあります。"],
+  ["The city of the future is not a dream.","未来の都市は夢物語ではありません。"],
+  ["It is being built today, choice by choice.","一つひとつの選択によって、今日すでに築かれているのです。"]]}
+];
+
 const THEMES = [
 {phase:1, name:"Phase 1|身近なテーマ", items:[
 ["昨日したこと","What I Did Yesterday",["What did you do in the morning and evening?","How did you feel about the day?"]],
@@ -504,8 +623,9 @@ const THEMES = [
 
 /* ================= STATE ================= */
 const KEY = "bridge_v1";
-let S = {vocab:{}, custom:[], sak:{}, log:{}, newLog:{}, settings:{rate:0.95, voice:""}};
+let S = {vocab:{}, custom:[], sak:{}, log:{}, newLog:{}, listen:{}, settings:{rate:0.95, voice:""}};
 try{ const raw = localStorage.getItem(KEY); if(raw){ S = Object.assign(S, JSON.parse(raw)); } }catch(e){}
+if(!S.listen) S.listen = {};
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 function todayStr(d){ d = d || new Date(); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
 function addDays(str, n){ const d = new Date(str+"T12:00:00"); d.setDate(d.getDate()+n); return todayStr(d); }
@@ -522,6 +642,7 @@ function showTab(name){
   if(name==="vocab") renderVocabHome();
   if(name==="sak") renderSakHome();
   if(name==="shadow") renderShadowList();
+  if(name==="listen") renderListenList();
   if(name==="speech") renderSpeechHome();
   window.scrollTo(0,0);
 }
@@ -536,7 +657,7 @@ const DAY_TASKS = () => {
     {t:"シャドーイング", s:"20分|同じ素材を1週間", min:20, tab:"shadow", dot:"var(--dot-shadow)"},
     speechDay
       ? {t:"1分間スピーチ", s:"10分|録音→聞き直し→再録音", min:10, tab:"speech", dot:"var(--dot-speech)"}
-      : {t:"多聴", s:"10分|elllo など理解できる素材", min:10, tab:"", dot:"var(--dot-listen)"}
+      : {t:"多聴", s:"10分|タップで再生。まずスクリプトなしで", min:10, tab:"listen", dot:"var(--dot-listen)"}
   ];
 };
 const DEFAULT_PURPOSE = "国際協力の仕事で、通訳なしで現地パートナーと話し、自分の言葉で発言できるようになる。";
@@ -993,6 +1114,100 @@ function renderShadowDetail(sc){
   document.getElementById("shJp").addEventListener("click", e => {
     showJp = !showJp; e.target.textContent = showJp ? "訳を隠す" : "訳を表示";
     renderText();
+  });
+}
+
+/* ================= LISTEN ================= */
+function listenMins(tr){
+  const words = tr.sents.reduce((a,p)=>a+p[0].split(" ").length,0);
+  return Math.max(1, Math.round(words/100));
+}
+function renderListenList(){
+  document.getElementById("listenDetail").style.display = "none";
+  const list = document.getElementById("listenList");
+  list.style.display = ""; list.innerHTML =
+    '<p class="muted small" style="margin:0 4px 10px">タップ→▶でそのまま再生。<strong>1回目はスクリプトを見ずに</strong>聴き、2回目でスクリプト確認が基本形。2〜3本を各2回聴けば約10分です。</p>';
+  LISTEN.forEach(tr => {
+    const count = S.listen[tr.id] || 0;
+    const btn = document.createElement("button");
+    btn.className = "rowbtn"; btn.type = "button";
+    btn.innerHTML =
+      '<span class="pill'+(tr.level==="A2"?" good":(tr.level==="B1+"?" warn":""))+'">'+tr.level+'</span>'+
+      '<div class="info"><div class="t">'+esc(tr.title)+'</div><div class="s">'+esc(tr.jpTitle)+'|約'+listenMins(tr)+'分'+(count?'|聴いた回数 '+count:'')+'</div></div>'+
+      '<span class="arr">'+(count?"✓":"›")+'</span>';
+    btn.addEventListener("click", () => renderListenDetail(tr));
+    list.appendChild(btn);
+  });
+}
+let listenPlaying = false;
+function renderListenDetail(tr){
+  document.getElementById("listenList").style.display = "none";
+  const d = document.getElementById("listenDetail");
+  d.style.display = "";
+  let showScript = false;
+  const rate = S.settings.rate || 0.95;
+  d.innerHTML =
+    '<button class="backlink" id="liBack" type="button">‹ トラック一覧へ</button>'+
+    '<div class="card">'+
+    '<div><span class="pill">'+tr.level+'</span> <strong>'+esc(tr.title)+'</strong><div class="muted small">'+esc(tr.jpTitle)+'|約'+listenMins(tr)+'分|聴いた回数 <span id="liCount">'+(S.listen[tr.id]||0)+'</span></div></div>'+
+    '<div class="center" style="margin:14px 0 4px">'+
+    '<button class="btn primary" id="liPlay" type="button" style="font-size:1.1rem;padding:14px 28px">▶ 再生</button>'+
+    '<div class="muted small" id="liProg" style="margin-top:8px">スクリプトなしで、まず耳だけで</div></div>'+
+    '<div class="controls">'+
+    '<label for="liRate">速度 <span id="liRateVal">'+rate.toFixed(2)+'</span>x</label>'+
+    '<input type="range" id="liRate" min="0.7" max="1.2" step="0.05" value="'+rate+'">'+
+    '<button class="btn" id="liScript" type="button">スクリプトを見る</button>'+
+    '</div>'+
+    '<div class="script" id="liText" hidden></div>'+
+    '</div>';
+  document.getElementById("liBack").addEventListener("click", () => { listenPlaying=false; speechSynthesis.cancel(); renderListenList(); });
+  function curRate(){ return parseFloat(document.getElementById("liRate").value); }
+  document.getElementById("liRate").addEventListener("input", e => {
+    document.getElementById("liRateVal").textContent = parseFloat(e.target.value).toFixed(2);
+    S.settings.rate = parseFloat(e.target.value); save();
+  });
+  const textEl = document.getElementById("liText");
+  function renderScript(){
+    textEl.innerHTML = "";
+    tr.sents.forEach(pair => {
+      const en = document.createElement("span");
+      en.textContent = pair[0] + " ";
+      textEl.appendChild(en);
+      const jp = document.createElement("span");
+      jp.className = "jp-line"; jp.textContent = pair[1];
+      textEl.appendChild(jp);
+    });
+  }
+  document.getElementById("liScript").addEventListener("click", e => {
+    showScript = !showScript;
+    textEl.hidden = !showScript;
+    if(showScript && !textEl.innerHTML) renderScript();
+    e.target.textContent = showScript ? "スクリプトを隠す" : "スクリプトを見る";
+  });
+  const progEl = document.getElementById("liProg");
+  const playBtn = document.getElementById("liPlay");
+  function playFrom(i){
+    if(!listenPlaying) return;
+    if(i >= tr.sents.length){
+      listenPlaying = false;
+      playBtn.textContent = "▶ もう一度";
+      S.listen[tr.id] = (S.listen[tr.id]||0) + 1; save();
+      document.getElementById("liCount").textContent = S.listen[tr.id];
+      progEl.textContent = "✓ 聴き終えました。2回目はスクリプトを見ながらどうぞ";
+      return;
+    }
+    progEl.textContent = (i+1) + " / " + tr.sents.length;
+    speak(tr.sents[i][0], curRate(), () => playFrom(i+1));
+  }
+  playBtn.addEventListener("click", () => {
+    if(listenPlaying){
+      listenPlaying = false; speechSynthesis.cancel();
+      playBtn.textContent = "▶ 再生"; progEl.textContent = "停止しました";
+      return;
+    }
+    listenPlaying = true;
+    playBtn.textContent = "■ 停止";
+    playFrom(0);
   });
 }
 
