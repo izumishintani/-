@@ -576,6 +576,41 @@ const LISTEN = [
   ["It is being built today, choice by choice.","一つひとつの選択によって、今日すでに築かれているのです。"]]}
 ];
 
+const LISTEN_QUIZ = {
+l1:[
+ {q:"What time does the writer arrive at the office?", opts:["At eight","At nine","At ten"], a:1},
+ {q:"What does the team do at the ten o'clock meeting?", opts:["They share their plans for the day","They have lunch together","They write reports"], a:0},
+ {q:"When does the boss need the report?", opts:["By Monday","By Wednesday","By Friday"], a:2}],
+l2:[
+ {q:"When is the market open?", opts:["Every Saturday","Every Sunday","Every day"], a:0},
+ {q:"What did the writer buy too many of last week?", opts:["Tomatoes","Oranges","Cookies"], a:1},
+ {q:"What did the neighbor give the writer?", opts:["Juice","Sweet corn","Cookies"], a:2}],
+l3:[
+ {q:"Where does Ken volunteer?", opts:["At a food bank","At a school","At a hospital"], a:0},
+ {q:"What is Ken's job there?", opts:["Cooking meals","Checking food and putting it in boxes","Driving a truck"], a:1},
+ {q:"How did Ken feel at first?", opts:["Nervous","Bored","Angry"], a:0}],
+l4:[
+ {q:"How many rooms does the school have?", opts:["Two","Six","Sixty"], a:0},
+ {q:"What did the NGO and the village build together?", opts:["A library","A well","A road"], a:1},
+ {q:"What happened after the school got safe water?", opts:["Attendance went up by thirty percent","The school closed","The garden was sold"], a:0}],
+l5:[
+ {q:"Why did banks refuse to lend money to Amina?", opts:["She was too young","She had no land and no savings","She already had another loan"], a:1},
+ {q:"What did Amina buy with the loan?", opts:["A sewing machine","A shop","A market stall"], a:0},
+ {q:"What happened in two years?", opts:["She lost her business","She moved to another country","She paid back the loan and hired two women"], a:2}],
+l6:[
+ {q:"How long does plastic stay in the ocean?", opts:["A few weeks","About ten years","Hundreds of years"], a:2},
+ {q:"What have some countries done?", opts:["Banned plastic bags completely","Closed their beaches","Stopped fishing"], a:0},
+ {q:"Which is NOT one of the simple daily actions in the story?", opts:["Bringing your own bag","Buying more bottled water","Saying no to plastic straws"], a:1}],
+l7:[
+ {q:"What disappeared from the world in 1980 thanks to vaccines?", opts:["Malaria","Smallpox","The flu"], a:1},
+ {q:"Why is it hard to deliver vaccines to some remote areas?", opts:["People don't want them","Poor roads and no electricity to keep them cold","They are too expensive to make"], a:1},
+ {q:"How does new technology help?", opts:["Drones deliver vaccines to mountain villages","Robots give injections","Satellites make vaccines"], a:0}],
+l8:[
+ {q:"How many of the world's people live in cities now?", opts:["About one third","More than half","Almost all"], a:1},
+ {q:"What becomes gas for city buses in one city?", opts:["Food waste from restaurants","Ocean plastic","Rooftop trees"], a:0},
+ {q:"According to the story, good cities are also...", opts:["big and famous","fair, with safe housing and transport for everyone","quiet and small"], a:1}]
+};
+
 const THEMES = [
 {phase:1, name:"Phase 1|身近なテーマ", items:[
 ["昨日したこと","What I Did Yesterday",["What did you do in the morning and evening?","How did you feel about the day?"]],
@@ -626,6 +661,7 @@ const KEY = "bridge_v1";
 let S = {vocab:{}, custom:[], sak:{}, log:{}, newLog:{}, listen:{}, settings:{rate:0.95, voice:""}};
 try{ const raw = localStorage.getItem(KEY); if(raw){ S = Object.assign(S, JSON.parse(raw)); } }catch(e){}
 if(!S.listen) S.listen = {};
+if(!S.listenQuiz) S.listenQuiz = {};
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 function todayStr(d){ d = d || new Date(); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
 function addDays(str, n){ const d = new Date(str+"T12:00:00"); d.setDate(d.getDate()+n); return todayStr(d); }
@@ -1126,14 +1162,15 @@ function renderListenList(){
   document.getElementById("listenDetail").style.display = "none";
   const list = document.getElementById("listenList");
   list.style.display = ""; list.innerHTML =
-    '<p class="muted small" style="margin:0 4px 10px">タップ→▶でそのまま再生。<strong>1回目はスクリプトを見ずに</strong>聴き、2回目でスクリプト確認が基本形。2〜3本を各2回聴けば約10分です。</p>';
+    '<p class="muted small" style="margin:0 4px 10px">タップ→▶でそのまま再生。基本形は<strong>①耳だけで聴く → ②理解度チェック3問 → ③スクリプト確認 → ④もう1回聴く</strong>。2〜3本で約10分です。</p>';
   LISTEN.forEach(tr => {
     const count = S.listen[tr.id] || 0;
+    const best = S.listenQuiz[tr.id];
     const btn = document.createElement("button");
     btn.className = "rowbtn"; btn.type = "button";
     btn.innerHTML =
       '<span class="pill'+(tr.level==="A2"?" good":(tr.level==="B1+"?" warn":""))+'">'+tr.level+'</span>'+
-      '<div class="info"><div class="t">'+esc(tr.title)+'</div><div class="s">'+esc(tr.jpTitle)+'|約'+listenMins(tr)+'分'+(count?'|聴いた回数 '+count:'')+'</div></div>'+
+      '<div class="info"><div class="t">'+esc(tr.title)+'</div><div class="s">'+esc(tr.jpTitle)+'|約'+listenMins(tr)+'分'+(count?'|聴いた回数 '+count:'')+(best!=null?'|チェック '+best+'/3':'')+'</div></div>'+
       '<span class="arr">'+(count?"✓":"›")+'</span>';
     btn.addEventListener("click", () => renderListenDetail(tr));
     list.appendChild(btn);
@@ -1159,6 +1196,10 @@ function renderListenDetail(tr){
     '<button class="btn" id="liScript" type="button">スクリプトを見る</button>'+
     '</div>'+
     '<div class="script" id="liText" hidden></div>'+
+    '<div class="vocabnote">'+
+    '<div class="small" style="font-weight:700;margin-bottom:6px">❓ 理解度チェック <span class="muted" id="liBest"></span></div>'+
+    '<div id="liQuiz"><button class="btn" id="liQuizStart" type="button">3問に挑戦(聴き終えてから)</button></div>'+
+    '</div>'+
     '</div>';
   document.getElementById("liBack").addEventListener("click", () => { listenPlaying=false; speechSynthesis.cancel(); renderListenList(); });
   function curRate(){ return parseFloat(document.getElementById("liRate").value); }
@@ -1208,6 +1249,56 @@ function renderListenDetail(tr){
     listenPlaying = true;
     playBtn.textContent = "■ 停止";
     playFrom(0);
+  });
+  // 理解度チェック
+  const quiz = LISTEN_QUIZ[tr.id] || [];
+  const bestEl = document.getElementById("liBest");
+  if(S.listenQuiz[tr.id] != null) bestEl.textContent = "ベスト " + S.listenQuiz[tr.id] + "/" + quiz.length;
+  document.getElementById("liQuizStart").addEventListener("click", () => {
+    const wrap = document.getElementById("liQuiz");
+    wrap.innerHTML = "";
+    let score = 0, answered = 0;
+    const result = document.createElement("p");
+    quiz.forEach(item => {
+      const qd = document.createElement("div");
+      qd.style.margin = "0 0 12px";
+      const qt = document.createElement("div");
+      qt.className = "script"; qt.style.fontSize = ".98rem"; qt.style.marginBottom = "6px";
+      qt.textContent = item.q;
+      qd.appendChild(qt);
+      const row = document.createElement("div");
+      row.style.display = "flex"; row.style.flexDirection = "column"; row.style.gap = "6px";
+      let done = false;
+      item.opts.forEach((opt, oi) => {
+        const ob = document.createElement("button");
+        ob.className = "btn"; ob.type = "button";
+        ob.style.textAlign = "left"; ob.style.fontWeight = "500";
+        ob.textContent = opt;
+        ob.addEventListener("click", () => {
+          if(done) return;
+          done = true; answered++;
+          if(oi === item.a){
+            score++;
+            ob.classList.remove("btn"); ob.className = "btn good";
+          } else {
+            ob.className = "btn warn";
+            row.children[item.a].className = "btn good";
+          }
+          if(answered === quiz.length){
+            result.innerHTML = '<strong>'+score+' / '+quiz.length+' 正解</strong>'+
+              (score===quiz.length ? "|完璧です 🎉" : "|間違えた問題の答えをスクリプトで探してみましょう");
+            const prev = S.listenQuiz[tr.id];
+            if(prev == null || score > prev){ S.listenQuiz[tr.id] = score; save(); }
+            bestEl.textContent = "ベスト " + S.listenQuiz[tr.id] + "/" + quiz.length;
+          }
+        });
+        row.appendChild(ob);
+      });
+      qd.appendChild(row);
+      wrap.appendChild(qd);
+    });
+    result.className = "small"; result.style.margin = "4px 0 0";
+    wrap.appendChild(result);
   });
 }
 
