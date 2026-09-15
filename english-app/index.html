@@ -662,6 +662,7 @@ let S = {vocab:{}, custom:[], sak:{}, log:{}, newLog:{}, listen:{}, settings:{ra
 try{ const raw = localStorage.getItem(KEY); if(raw){ S = Object.assign(S, JSON.parse(raw)); } }catch(e){}
 if(!S.listen) S.listen = {};
 if(!S.listenQuiz) S.listenQuiz = {};
+if(!S.shadowScore) S.shadowScore = {};
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 function todayStr(d){ d = d || new Date(); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
 function addDays(str, n){ const d = new Date(str+"T12:00:00"); d.setDate(d.getDate()+n); return todayStr(d); }
@@ -1064,11 +1065,12 @@ function renderShadowList(){
   list.style.display = ""; list.innerHTML =
     '<p class="muted small" style="margin:0 4px 10px">同じ素材を1週間使う:聴く→意味確認→オーバーラッピング→シャドーイング→仕上げに1.2倍速。文をタップすると1文だけ再生できます。</p>';
   SCRIPTS.forEach(sc => {
+    const best = S.shadowScore[sc.id];
     const btn = document.createElement("button");
     btn.className = "rowbtn"; btn.type = "button";
     btn.innerHTML =
       '<span class="pill'+(sc.level==="A2"?" good":(sc.level==="B2"?" warn":""))+'">'+sc.level+'</span>'+
-      '<div class="info"><div class="t">'+esc(sc.title)+'</div><div class="s">'+esc(sc.jpTitle)+'|Phase '+sc.phase+'|'+sc.sents.length+'文</div></div>'+
+      '<div class="info"><div class="t">'+esc(sc.title)+'</div><div class="s">'+esc(sc.jpTitle)+'|Phase '+sc.phase+'|'+sc.sents.length+'文'+(best!=null?'|採点ベスト '+best+'%':'')+'</div></div>'+
       '<span class="arr">›</span>';
     btn.addEventListener("click", () => renderShadowDetail(sc));
     list.appendChild(btn);
@@ -1097,8 +1099,16 @@ function renderShadowDetail(sc){
     '</div>'+
     '<div class="script" id="shText"></div>'+
     '<div class="vocabnote" id="shVocab"></div>'+
+    '<div class="vocabnote">'+
+    '<div class="small" style="font-weight:700;margin-bottom:6px">🎙 録音&採点 <span class="muted" id="shBest"></span></div>'+
+    '<div class="btnrow" style="justify-content:flex-start">'+
+    '<button class="btn" id="shRecBtn" type="button">● 録音しながら通し再生</button>'+
+    '<button class="btn" id="shScoreBtn" type="button">🎯 採点チャレンジ</button></div>'+
+    '<div id="shRecOut"></div>'+
+    '<div id="shScoreOut"></div>'+
+    '</div>'+
     '</div>';
-  document.getElementById("shBack").addEventListener("click", () => { speechSynthesis.cancel(); shadowPlaying=false; renderShadowList(); });
+  document.getElementById("shBack").addEventListener("click", () => { speechSynthesis.cancel(); shadowPlaying=false; cleanupShadowRec(); renderShadowList(); });
   const textEl = document.getElementById("shText");
   function renderText(){
     textEl.innerHTML = "";
@@ -1150,6 +1160,165 @@ function renderShadowDetail(sc){
   document.getElementById("shJp").addEventListener("click", e => {
     showJp = !showJp; e.target.textContent = showJp ? "訳を隠す" : "訳を表示";
     renderText();
+  });
+
+  /* ---- 録音(モデル音声と一緒に録る) ---- */
+  const shRec = {media:null, recorder:null, chunks:[]};
+  function cleanupShadowRec(){
+    if(shRec.recorder && shRec.recorder.state !== "inactive"){ try{ shRec.recorder.stop(); }catch(e){} }
+    if(shRec.media){ shRec.media.getTracks().forEach(t=>t.stop()); shRec.media = null; }
+  }
+  const recBtn = document.getElementById("shRecBtn");
+  const recOut = document.getElementById("shRecOut");
+  recBtn.addEventListener("click", async () => {
+    if(shRec.recorder && shRec.recorder.state === "recording"){
+      shRec.recorder.stop();
+      shadowPlaying = false; speechSynthesis.cancel(); highlight(-1);
+      return;
+    }
+    if(!navigator.mediaDevices || !window.MediaRecorder){
+      recOut.innerHTML = '<p class="muted small">この画面では録音を利用できません。Safariで開くと使える場合があります。</p>';
+      return;
+    }
+    try{
+      shRec.media = await navigator.mediaDevices.getUserMedia({audio:true});
+    }catch(err){
+      recOut.innerHTML = '<p class="muted small">マイクを利用できませんでした。アプリ内ビューアではマイクが使えないことがあります(Safariで開くと使える場合あり)。</p>';
+      return;
+    }
+    shRec.chunks = [];
+    shRec.recorder = new MediaRecorder(shRec.media);
+    shRec.recorder.ondataavailable = ev => { if(ev.data.size) shRec.chunks.push(ev.data); };
+    shRec.recorder.onstop = () => {
+      const blob = new Blob(shRec.chunks, {type: shRec.recorder.mimeType || "audio/webm"});
+      const url = URL.createObjectURL(blob);
+      recOut.innerHTML =
+        '<audio controls src="'+url+'"></audio>'+
+        '<p class="muted small" style="margin:6px 0 0">モデル音声と自分の声が一緒に入っています。ズレた文・つられなかった文を探して、その文だけタップ再生で練習を。</p>';
+      recBtn.textContent = "● 録音しながら通し再生";
+      if(shRec.media){ shRec.media.getTracks().forEach(t=>t.stop()); shRec.media = null; }
+    };
+    shRec.recorder.start();
+    recBtn.textContent = "■ 録音を止める";
+    recOut.innerHTML = '<p class="muted small" style="margin:6px 0 0">録音中…モデル音声に重ねて声を出しましょう。</p>';
+    shadowPlaying = true;
+    playAll(0);
+    // 通し再生が終わったら自動で録音も止める
+    const watch = setInterval(() => {
+      if(!shadowPlaying){
+        clearInterval(watch);
+        if(shRec.recorder && shRec.recorder.state === "recording") shRec.recorder.stop();
+      }
+    }, 500);
+  });
+
+  /* ---- 採点チャレンジ(音声認識でスクリプトと照合) ---- */
+  const SRCls = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const scoreOut = document.getElementById("shScoreOut");
+  const bestEl = document.getElementById("shBest");
+  if(S.shadowScore[sc.id] != null) bestEl.textContent = "ベスト " + S.shadowScore[sc.id] + "%";
+  function normTokens(s){ return s.toLowerCase().replace(/[^a-z0-9' ]/g," ").split(/\s+/).filter(Boolean); }
+  function lcsMatch(a, b){
+    const m = a.length, n = b.length;
+    const dp = Array.from({length:m+1}, () => new Array(n+1).fill(0));
+    for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+    const matched = new Set(); let i=m, j=n;
+    while(i>0 && j>0){
+      if(a[i-1]===b[j-1]){ matched.add(i-1); i--; j--; }
+      else if(dp[i-1][j] >= dp[i][j-1]) i--; else j--;
+    }
+    return {len:dp[m][n], matched};
+  }
+  document.getElementById("shScoreBtn").addEventListener("click", () => {
+    if(!SRCls){
+      scoreOut.innerHTML = '<p class="muted small">この環境では音声認識(採点)を利用できません。Safariで開くと使える場合があります。録音機能での聞き比べは引き続き使えます。</p>';
+      return;
+    }
+    let qi = 0; const scores = [];
+    function showSent(){
+      if(qi >= sc.sents.length){ finish(); return; }
+      const target = sc.sents[qi][0];
+      scoreOut.innerHTML =
+        '<div style="margin-top:8px"><div class="muted small">'+(qi+1)+' / '+sc.sents.length+'</div>'+
+        '<div class="script" id="scTarget" style="margin:4px 0 8px"></div>'+
+        '<div class="btnrow" style="justify-content:flex-start">'+
+        '<button class="btn" id="scListen" type="button">🔊 聞く</button>'+
+        '<button class="btn primary" id="scSpeak" type="button">🎤 この文を言う</button>'+
+        '<button class="btn ghost" id="scSkip" type="button">スキップ</button></div>'+
+        '<div id="scResult" class="small" style="margin-top:8px"></div></div>';
+      const tEl = document.getElementById("scTarget");
+      const words = target.split(" ");
+      words.forEach(w => { const sp = document.createElement("span"); sp.textContent = w + " "; tEl.appendChild(sp); });
+      document.getElementById("scListen").addEventListener("click", () => speak(target, S.settings.rate));
+      document.getElementById("scSkip").addEventListener("click", () => { qi++; showSent(); });
+      document.getElementById("scSpeak").addEventListener("click", (e) => {
+        speechSynthesis.cancel();
+        const resEl = document.getElementById("scResult");
+        let r;
+        try{ r = new SRCls(); }catch(err){ resEl.textContent = "音声認識を開始できませんでした。"; return; }
+        r.lang = "en-US"; r.interimResults = false; r.maxAlternatives = 1;
+        e.target.textContent = "👂 聞き取り中…";
+        e.target.disabled = true;
+        let got = false;
+        r.onresult = ev => {
+          got = true;
+          const heard = ev.results[0][0].transcript;
+          const tks = normTokens(target), hks = normTokens(heard);
+          const {len, matched} = lcsMatch(tks, hks);
+          const pct = tks.length ? Math.round(100*len/tks.length) : 0;
+          scores[qi] = pct;
+          // 言えた語は緑、落ちた語はオレンジで表示
+          let wi = 0;
+          Array.from(tEl.children).forEach(sp => {
+            const toks = normTokens(sp.textContent);
+            if(!toks.length) return;
+            let all = true;
+            for(let k=0;k<toks.length;k++){ if(!matched.has(wi+k)) all = false; }
+            sp.style.color = all ? "var(--good)" : "var(--warn)";
+            sp.style.fontWeight = all ? "400" : "700";
+            wi += toks.length;
+          });
+          const label = pct>=90 ? "Excellent! 🎉" : pct>=70 ? "Good!" : pct>=50 ? "もう少し!" : "もう一度聞いてから挑戦を";
+          resEl.innerHTML = '<strong>'+pct+'%</strong>|'+label+
+            '<br><span class="muted">認識された音声: '+esc(heard)+'</span>'+
+            '<div class="btnrow" style="justify-content:flex-start;margin-top:8px">'+
+            '<button class="btn" id="scRetry" type="button">もう一度</button>'+
+            '<button class="btn primary" id="scNext" type="button">'+(qi+1>=sc.sents.length?"結果を見る":"次の文へ")+'</button></div>';
+          document.getElementById("scRetry").addEventListener("click", () => showSent());
+          document.getElementById("scNext").addEventListener("click", () => { qi++; showSent(); });
+        };
+        r.onerror = ev => {
+          got = true;
+          e.target.textContent = "🎤 この文を言う"; e.target.disabled = false;
+          resEl.textContent = (ev.error==="not-allowed" || ev.error==="service-not-allowed")
+            ? "マイク/音声認識の許可が得られませんでした。Safariで開くと使える場合があります。"
+            : "聞き取れませんでした。もう一度「🎤 この文を言う」を押してください。";
+        };
+        r.onend = () => {
+          if(!got){
+            e.target.textContent = "🎤 この文を言う"; e.target.disabled = false;
+            resEl.textContent = "聞き取れませんでした。静かな場所で、はっきりめに話してみてください。";
+          }
+        };
+        try{ r.start(); }catch(err){ resEl.textContent = "音声認識を開始できませんでした。"; e.target.disabled = false; }
+      });
+    }
+    function finish(){
+      const done = scores.filter(s => typeof s === "number");
+      if(!done.length){ scoreOut.innerHTML = '<p class="muted small">採点した文がありませんでした。</p>'; return; }
+      const avg = Math.round(done.reduce((a,b)=>a+b,0)/done.length);
+      const prev = S.shadowScore[sc.id];
+      if(prev == null || avg > prev){ S.shadowScore[sc.id] = avg; save(); }
+      bestEl.textContent = "ベスト " + S.shadowScore[sc.id] + "%";
+      scoreOut.innerHTML =
+        '<div style="margin-top:8px"><strong>平均 '+avg+'%</strong>('+done.length+'文採点)'+
+        (avg >= (prev||0) ? '|<span style="color:var(--good)">ベスト更新!</span>' : '|ベスト '+S.shadowScore[sc.id]+'%')+
+        '<p class="muted small" style="margin:6px 0 0">70%を超えたら次の教材へ進んでOK。オレンジになった語は、音の連結で消えやすい語です。</p>'+
+        '<div class="btnrow" style="justify-content:flex-start;margin-top:8px"><button class="btn" id="scAgain" type="button">最初からもう一度</button></div></div>';
+      document.getElementById("scAgain").addEventListener("click", () => { qi=0; scores.length=0; showSent(); });
+    }
+    showSent();
   });
 }
 
