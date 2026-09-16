@@ -658,11 +658,14 @@ const THEMES = [
 
 /* ================= STATE ================= */
 const KEY = "bridge_v1";
-let S = {vocab:{}, custom:[], sak:{}, log:{}, newLog:{}, listen:{}, settings:{rate:0.95, voice:""}};
+let S = {vocab:{}, custom:[], sak:{}, log:{}, newLog:{}, listen:{}, time:{}, settings:{rate:0.95, voice:""}};
 try{ const raw = localStorage.getItem(KEY); if(raw){ S = Object.assign(S, JSON.parse(raw)); } }catch(e){}
 if(!S.listen) S.listen = {};
 if(!S.listenQuiz) S.listenQuiz = {};
 if(!S.shadowScore) S.shadowScore = {};
+if(!S.time) S.time = {};
+// 旧SRS形式からの移行: 過去に「言えた」にした語(box>=1)は卒業扱い
+Object.values(S.vocab).forEach(st => { if(st && st.box >= 1 && !st.done) st.done = true; });
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 function todayStr(d){ d = d || new Date(); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
 function addDays(str, n){ const d = new Date(str+"T12:00:00"); d.setDate(d.getDate()+n); return todayStr(d); }
@@ -741,7 +744,7 @@ function renderMinCard(){
     '<button class="btn" id="minStart" type="button">▶ 単語5分だけ</button>'+
     '<button class="btn good" id="minDone" type="button">最低ライン達成にする</button></div>';
   document.getElementById("minStart").addEventListener("click", () => {
-    startTimer(5*60, "最低ライン|単語");
+    startTimer(5*60, "最低ライン|単語", 0);
     showTab("vocab");
   });
   document.getElementById("minDone").addEventListener("click", () => {
@@ -758,19 +761,22 @@ function renderHome(){
   const tasksEl = document.getElementById("taskList");
   tasksEl.innerHTML = "";
   DAY_TASKS().forEach((task,i) => {
+    const doneSec = (S.time[today]||[])[i] || 0;
+    const doneMin = Math.min(Math.floor(doneSec/60), task.min);
+    const remain = Math.max(0, task.min*60 - doneSec);
     const div = document.createElement("div");
     div.className = "task" + (log[i] ? " done" : "");
     div.innerHTML =
       '<button class="chk" type="button" aria-label="完了にする">'+(log[i]?"✓":"")+'</button>' +
       '<span class="dot" style="background:'+task.dot+'"></span>' +
-      '<div class="info"><div class="t">'+esc(task.t)+'</div><div class="s">'+esc(task.s)+'</div></div>' +
-      '<button class="go" type="button">▶ '+task.min+'分</button>';
+      '<div class="info"><div class="t">'+esc(task.t)+'</div><div class="s">'+esc(task.s)+(doneSec>0?'|消化 '+doneMin+'/'+task.min+'分':'')+'</div></div>' +
+      '<button class="go" type="button">▶ '+(remain>0 ? Math.ceil(remain/60) : task.min)+'分</button>';
     div.querySelector(".chk").addEventListener("click", () => {
       const l = S.log[today] || [false,false,false,false];
       l[i] = !l[i]; S.log[today] = l; save(); renderHome();
     });
     div.querySelector(".go").addEventListener("click", () => {
-      startTimer(task.min*60, task.t);
+      startTimer(remain>0 ? remain : task.min*60, task.t, i);
       if(task.tab) showTab(task.tab);
     });
     tasksEl.appendChild(div);
@@ -806,11 +812,13 @@ function renderHome(){
 }
 
 /* ================= TIMER ================= */
-let timer = {left:0, id:null, paused:false};
+let timer = {left:0, id:null, paused:false, taskIdx:null, saveCount:0};
 const timerBar = document.getElementById("timerBar");
-function startTimer(sec, label){
+function startTimer(sec, label, taskIdx){
   stopTimer();
   timer.left = sec; timer.paused = false;
+  timer.taskIdx = (typeof taskIdx === "number") ? taskIdx : null;
+  timer.saveCount = 0;
   document.getElementById("timerLabel").textContent = label;
   timerBar.classList.add("on");
   tick();
@@ -822,8 +830,28 @@ function tick(){
   document.getElementById("timerTime").textContent = String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
   if(timer.left <= 0){ stopTimer(); beep(); return; }
   timer.left--;
+  // 実施時間を1秒ずつ積算(3分だけでもその分を消化としてカウント)
+  if(timer.taskIdx != null){
+    const today = todayStr();
+    const arr = S.time[today] || (S.time[today] = [0,0,0,0]);
+    arr[timer.taskIdx]++;
+    const target = (DAY_TASKS()[timer.taskIdx] || {min:15}).min * 60;
+    if(arr[timer.taskIdx] >= target){
+      const l = S.log[today] || [false,false,false,false];
+      if(!l[timer.taskIdx]){
+        l[timer.taskIdx] = true; S.log[today] = l; save();
+        if(document.getElementById("tab-home").classList.contains("active")) renderHome();
+      }
+    }
+    timer.saveCount++;
+    if(timer.saveCount % 10 === 0) save();
+  }
 }
-function stopTimer(){ if(timer.id){ clearInterval(timer.id); timer.id=null; } timerBar.classList.remove("on"); }
+function stopTimer(){
+  if(timer.id){ clearInterval(timer.id); timer.id=null; }
+  if(timer.taskIdx != null){ save(); timer.taskIdx = null; if(document.getElementById("tab-home").classList.contains("active")) renderHome(); }
+  timerBar.classList.remove("on");
+}
 document.getElementById("timerStop").addEventListener("click", stopTimer);
 document.getElementById("timerPause").addEventListener("click", e => {
   timer.paused = !timer.paused;
@@ -896,7 +924,7 @@ function buildVocabQueue(){
   const due = [], freshSpec = [], freshToeic = [], freshGen = [];
   allTerms().forEach(t => {
     const st = S.vocab[t.id];
-    if(st){ if(st.due <= today) due.push(t); }
+    if(st){ if(!st.done && st.due <= today) due.push(t); }
     else if(t.cat === "gen") freshGen.push(t);
     else if(t.cat === "toeic") freshToeic.push(t);
     else freshSpec.push(t);
@@ -910,7 +938,7 @@ function buildVocabQueue(){
 function renderVocabHome(){
   const today = todayStr();
   const learned = Object.keys(S.vocab).length;
-  const mastered = Object.values(S.vocab).filter(s=>s.box>=4).length;
+  const mastered = Object.values(S.vocab).filter(s=>s.done).length;
   const queue = buildVocabQueue();
   document.getElementById("vocabDrill").style.display = "none";
   const el = document.getElementById("vocabHome");
@@ -919,8 +947,9 @@ function renderVocabHome(){
     '<div style="display:flex;gap:18px;margin-bottom:12px">'+
     '<div><div style="font-weight:800;font-size:1.5rem;font-variant-numeric:tabular-nums">'+queue.length+'</div><div class="muted small">今日のカード</div></div>'+
     '<div><div style="font-weight:800;font-size:1.5rem;font-variant-numeric:tabular-nums">'+learned+'<span class="muted" style="font-size:.9rem;font-weight:400">/'+allTerms().length+'</span></div><div class="muted small">学習済み</div></div>'+
-    '<div><div style="font-weight:800;font-size:1.5rem;font-variant-numeric:tabular-nums">'+mastered+'</div><div class="muted small">定着(Box4+)</div></div>'+
+    '<div><div style="font-weight:800;font-size:1.5rem;font-variant-numeric:tabular-nums">'+mastered+'</div><div class="muted small">卒業(言えた)</div></div>'+
     '</div>'+
+    '<p class="muted small" style="margin:0 0 10px">「言えた」を押した語は卒業となり、二度と出題されません。「言えなかった」語だけが繰り返し出ます。</p>'+
     (queue.length
       ? '<button class="btn primary" id="startVocab" type="button" style="width:100%">今日の単語を始める</button>'
       : '<p class="muted center" style="margin:6px 0">今日の分は完了!また明日 🎉</p>')+
@@ -974,8 +1003,7 @@ function startVocabDrill(queue){
     if(wasNew){ const n = newLogToday(); if(t.cat === "gen") n.g++; else if(t.cat === "toeic") n.t++; else n.s++; }
     let st = S.vocab[t.id] || {box:0, due:today};
     if(ok){
-      st.box = Math.min(st.box+1, 5);
-      st.due = addDays(today, INTERVALS[st.box-1] || 1);
+      st.done = true; // 「言えた」で卒業。以後は出題しない
       doneCount++;
     } else {
       st.box = 0; st.due = today;
